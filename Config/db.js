@@ -1,24 +1,26 @@
+// Config/db.js
 const mysql = require('mysql2/promise');
 
-// Configuración de la conexión a la base de datos
-const dbConfig = {
-    host: 'localhost',      // O la IP de tu servidor MySQL
-    user: 'root',     // Tu usuario de MySQL (ej. root)
-    password: '', // Tu contraseña de MySQL
-    database: 'proyectoanalisis' // El nombre de tu base de datos
-};
+const db = mysql.createPool({
+  host: 'localhost',
+  user: 'root',      // Tu usuario de MySQL
+  password: '',      // Tu contraseña
+  database: 'ProyectoAnalisis',
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
+});
 
+// Función opcional para probar la conexión
 async function conectarBD() {
-    try {
-        // Crear la conexión
-        const connection = await mysql.createConnection(dbConfig);
-        console.log('¡Conexión exitosa a la base de datos MySQL!');
-
-       
-
-    } catch (error) {
-        console.error('Error al conectar o consultar la base de datos:', error.message);
-    }
+  try {
+    const connection = await db.getConnection();
+    console.log("¡Conexión exitosa a la base de datos MySQL!");
+    connection.release();
+  } catch (error) {
+    console.error("Error al conectar a la base de datos:", error.message);
+  }
 }
 
-module.exports = { conectarBD };
+// Exportamos el pool db y la función
+module.exports = { db, conectarBD };
