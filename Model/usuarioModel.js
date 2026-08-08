@@ -1,4 +1,5 @@
 const { db } = require('../Config/db.js');
+const bcrypt = require('bcrypt');
 
 // 1. Buscar usuario para login directo
 async function buscarParaLogin(idUsuario, password) {
@@ -54,10 +55,53 @@ async function resetearIntentosYEstado(idUsuario, idStatusActivo) {
   await db.query(sql, [idStatusActivo, idUsuario]);
 }
 
+// Reemplaza la función crearUsuario existente con esta:
+async function crearUsuario(usuario) {
+  const { 
+    IdUsuario, Nombre, Apellido, FechaNacimiento, Password, 
+    IdGenero, CorreoElectronico, TelefonoMovil, IdSucursal, 
+    Pregunta, Respuesta, IdRole, UsuarioCreacion 
+  } = usuario;
+  
+  // --- NUEVO: Generamos el hash de la contraseña ---
+  const salt = await bcrypt.genSalt(10);
+  const hashedPassword = await bcrypt.hash(Password, salt);
+  // ------------------------------------------------
+
+  const sql = `
+    INSERT INTO USUARIO (
+      IdUsuario, Nombre, Apellido, FechaNacimiento, IdStatusUsuario, 
+      Password, IdGenero, IntentosDeAcceso, CorreoElectronico, 
+      RequiereCambiarPassword, TelefonoMovil, IdSucursal, 
+      Pregunta, Respuesta, IdRole, FechaCreacion, 
+      UsuarioCreacion, FechaModificacion, UsuarioModificacion
+    )
+    VALUES (
+      ?, ?, ?, ?, 1, 
+      ?, ?, 0, ?, 
+      0, ?, ?, 
+      ?, ?, ?, NOW(), 
+      ?, NOW(), ?
+    )
+  `;
+  
+  // Si no se envía quién lo creó, asumimos que fue él mismo
+  const creador = UsuarioCreacion || IdUsuario;
+
+  // IMPORTANTE: Pasamos 'hashedPassword' en lugar de 'Password'
+  await db.query(sql, [
+    IdUsuario, Nombre, Apellido, FechaNacimiento, 
+    hashedPassword, IdGenero, CorreoElectronico, 
+    TelefonoMovil, IdSucursal, Pregunta, Respuesta, 
+    IdRole, creador, creador
+  ]);
+}
+
 module.exports = {
   buscarParaLogin,
   obtenerPorId,
   registrarIntentoFallido,
   bloquearUsuario,
-  resetearIntentosYEstado
+  resetearIntentosYEstado,
+  crearUsuario
 };

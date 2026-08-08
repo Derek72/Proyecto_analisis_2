@@ -1,5 +1,6 @@
 const usuarioModel = require('../Model/usuarioModel.js');
 const bitacoraModel = require('../Model/bitacoraModel.js');
+const bcrypt = require('bcrypt');
 
 async function login(req, res) {
   const { Username, Password } = req.body;
@@ -45,7 +46,8 @@ async function login(req, res) {
     }
 
     // 3. VALIDAR CONTRASEÑA
-    if (usuario.Password !== Password) {
+    const passwordValida = await bcrypt.compare(Password, usuario.Password);
+    if (!passwordValida) {
       const intentos = await usuarioModel.registrarIntentoFallido(Username, usuario.IntentosDeAcceso || 0);
 
       if (intentos >= 3) {
