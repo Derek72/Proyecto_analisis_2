@@ -22,6 +22,7 @@
   "homepage": "https://github.com/Derek72/Proyecto_analisis_2#readme",
   "dependencies": {
     "bcrypt": "^6.0.0",
+    "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "mysql2": "^3.23.2"

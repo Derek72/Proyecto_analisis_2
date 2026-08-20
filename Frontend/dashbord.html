@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Empresas</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+  <!-- Barra de navegación -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+      <a class="navbar-brand" href="#">Proyecto Análisis</a>
+      <div class="d-flex align-items-center text-white">
+        <span id="nombre-usuario" class="me-3 fw-bold"></span>
+        <!-- Botón que nos servirá para el Paso 3 -->
+        <a href="crear-usuario.html" class="btn btn-sm btn-success me-2">Crear Nuevo Usuario</a>
+        <button id="btn-logout" class="btn btn-sm btn-outline-danger">Cerrar Sesión</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Contenido principal -->
+  <div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2>Directorio de Empresas</h2>
+    </div>
+    
+    <div id="alerta-empresas"></div>
+    
+    <div class="card shadow-sm">
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-striped table-hover m-0">
+            <thead class="table-dark">
+              <tr>
+                <th>ID</th>
+                <th>Nombre de la Empresa</th>
+                <th>Dirección</th>
+                <th>NIT</th>
+              </tr>
+            </thead>
+            <tbody id="tabla-empresas">
+              <tr>
+                <td colspan="4" class="text-center py-4">Cargando empresas...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>
