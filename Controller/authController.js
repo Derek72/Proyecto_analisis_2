@@ -12,14 +12,12 @@ async function login(req, res) {
   }
 
   try {
-    // 1. Verificar si el usuario existe
     const usuario = await usuarioModel.obtenerPorId(Username);
 
     if (!usuario) {
       return res.status(401).json({ mensaje: 'Credenciales incorrectas' });
     }
 
-    // 2. VERIFICAR SI ESTÁ BLOQUEADO (IdStatusUsuario = 3)
     if (usuario.IdStatusUsuario === 3) {
       const fechaBloqueo = new Date(usuario.FechaModificacion);
       const fechaActual = new Date();
@@ -45,13 +43,12 @@ async function login(req, res) {
       }
     }
 
-    // 3. VALIDAR CONTRASEÑA
     const passwordValida = await bcrypt.compare(Password, usuario.Password);
     if (!passwordValida) {
       const intentos = await usuarioModel.registrarIntentoFallido(Username, usuario.IntentosDeAcceso || 0);
 
       if (intentos >= 3) {
-        // Bloquear tras 3 intentos fallidos
+
         await usuarioModel.bloquearUsuario(Username, 3);
         
         await bitacoraModel.registrarAcceso({
@@ -66,7 +63,7 @@ async function login(req, res) {
           mensaje: 'Has superado el límite de 3 intentos fallidos. Tu cuenta ha sido bloqueada.' 
         });
       } else {
-        // Intento fallido normal (1 o 2)
+
         await bitacoraModel.registrarAcceso({
           IdUsuario: usuario.IdUsuario,
           IdTipoAcceso: 2,
@@ -81,7 +78,6 @@ async function login(req, res) {
       }
     }
 
-    // 4. ✅ LOGIN EXITOSO
     await usuarioModel.resetearIntentosYEstado(Username, 1);
 
     await bitacoraModel.registrarAcceso({

@@ -1,7 +1,6 @@
 const { db } = require('../Config/db.js');
 const bcrypt = require('bcrypt');
 
-// 1. Buscar usuario para login directo
 async function buscarParaLogin(idUsuario, password) {
   const sql = `
     SELECT u.IdUsuario, u.Nombre, u.Apellido, u.CorreoElectronico, u.IdStatusUsuario, 
@@ -14,7 +13,6 @@ async function buscarParaLogin(idUsuario, password) {
   return rows[0];
 }
 
-// 2. Buscar usuario solo por ID (para validar bloqueo antes de comparar contraseña)
 async function obtenerPorId(idUsuario) {
   const sql = `
     SELECT u.IdUsuario, u.Password, u.Nombre, u.Apellido, u.CorreoElectronico, u.IdStatusUsuario, 
@@ -27,7 +25,6 @@ async function obtenerPorId(idUsuario) {
   return rows[0];
 }
 
-// 3. Incrementar el contador de intentos fallidos
 async function registrarIntentoFallido(idUsuario, intentosActuales) {
   const nuevosIntentos = intentosActuales + 1;
   const sql = `UPDATE USUARIO SET IntentosDeAcceso = ? WHERE IdUsuario = ?`;
@@ -35,7 +32,6 @@ async function registrarIntentoFallido(idUsuario, intentosActuales) {
   return nuevosIntentos;
 }
 
-// 4. Bloquear usuario cambiando estado
 async function bloquearUsuario(idUsuario, idStatusBloqueado) {
   const sql = `
     UPDATE USUARIO 
@@ -45,7 +41,6 @@ async function bloquearUsuario(idUsuario, idStatusBloqueado) {
   await db.query(sql, [idStatusBloqueado, idUsuario]);
 }
 
-// 5. Resetear contador de intentos y restaurar estado activo
 async function resetearIntentosYEstado(idUsuario, idStatusActivo) {
   const sql = `
     UPDATE USUARIO 
@@ -55,7 +50,6 @@ async function resetearIntentosYEstado(idUsuario, idStatusActivo) {
   await db.query(sql, [idStatusActivo, idUsuario]);
 }
 
-// Reemplaza la función crearUsuario existente con esta:
 async function crearUsuario(usuario) {
   const { 
     IdUsuario, Nombre, Apellido, FechaNacimiento, Password, 
@@ -63,10 +57,8 @@ async function crearUsuario(usuario) {
     Pregunta, Respuesta, IdRole, UsuarioCreacion 
   } = usuario;
   
-  // --- NUEVO: Generamos el hash de la contraseña ---
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(Password, salt);
-  // ------------------------------------------------
 
   const sql = `
     INSERT INTO USUARIO (
@@ -85,10 +77,8 @@ async function crearUsuario(usuario) {
     )
   `;
   
-  // Si no se envía quién lo creó, asumimos que fue él mismo
   const creador = UsuarioCreacion || IdUsuario;
 
-  // IMPORTANTE: Pasamos 'hashedPassword' en lugar de 'Password'
   await db.query(sql, [
     IdUsuario, Nombre, Apellido, FechaNacimiento, 
     hashedPassword, IdGenero, CorreoElectronico, 

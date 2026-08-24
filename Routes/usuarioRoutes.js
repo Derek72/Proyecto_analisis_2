@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const usuarioController = require('../Controller/usuarioController.js');
+const { verificarPermisos } = require('../Middleware/autorizacion.js');
 
-// Ruta POST para crear un nuevo usuario
-router.post('/', usuarioController.crear);
+router.post('/usuarios', verificarPermisos('Usuarios', 'Alta'), usuarioController.crear);
 
 module.exports = router;
