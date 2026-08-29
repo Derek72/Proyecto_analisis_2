@@ -98,15 +98,22 @@ async function cargarUsuarios() {
         usuarios.forEach(u => {
             const tr = document.createElement('tr');
             const dataString = JSON.stringify(u).replace(/"/g, '&quot;');
-            
+
+            const btnEditar = tienePermiso('Cambio')
+                ? `<button class="btn btn-sm btn-warning me-1" onclick="cargarParaEdicion('${dataString}')">Editar</button>`
+                : '';
+            const btnEliminar = tienePermiso('Baja')
+                ? `<button class="btn btn-sm btn-danger" onclick="eliminarUsuario('${u.IdUsuario}')">Eliminar</button>`
+                : '';
+
             tr.innerHTML = `
                 <td><strong>${u.IdUsuario}</strong></td>
                 <td>${u.Nombre} ${u.Apellido || ''}</td>
                 <td>${u.CorreoElectronico}</td>
                 <td>${u.NombreRole || u.IdRole}</td>
                 <td>
-                    <button class="btn btn-sm btn-warning me-1" onclick="cargarParaEdicion('${dataString}')">Editar</button>
-                    <button class="btn btn-sm btn-danger" onclick="eliminarUsuario('${u.IdUsuario}')">Eliminar</button>
+                    ${btnEditar}
+                    ${btnEliminar}
                 </td>
             `;
             tbody.appendChild(tr);

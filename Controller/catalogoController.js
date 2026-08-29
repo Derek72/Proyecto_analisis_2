@@ -7,6 +7,7 @@ const moduloModel = require('../Model/moduloModel.js');
 const menuModel = require('../Model/menuModel.js');
 const opcionModel = require('../Model/opcionModel.js');
 const usuarioModel = require('../Model/usuarioModel.js');
+const { validarPasswordContraPolitica, obtenerPoliticaPorSucursal } = require('../Utils/passwordPolicy.js');
 
 //empresas
 async function obtenerEmpresas(req, res) {
@@ -314,8 +315,20 @@ async function obtenerUsuarios(req, res) {
 // --- USUARIOS ---
 async function crearUsuario(req, res) {
   try {
+    const datosUsuario = req.body;
+
+    if (datosUsuario.TelefonoMovil && datosUsuario.TelefonoMovil.length > 30) {
+      return res.status(400).json({ mensaje: 'El teléfono móvil no puede exceder 30 caracteres.' });
+    }
+
+    const politica = await obtenerPoliticaPorSucursal(datosUsuario.IdSucursal);
+    const resultado = validarPasswordContraPolitica(datosUsuario.Password || '', politica);
+    if (!resultado.valido) {
+      return res.status(400).json({ mensaje: resultado.mensaje });
+    }
+
     // Llama directamente a la función existente en usuarioModel.js
-    await usuarioModel.crearUsuario(req.body); 
+    await usuarioModel.crearUsuario(datosUsuario);
     res.status(201).json({ mensaje: 'Usuario creado exitosamente' });
   } catch (error) { 
     res.status(500).json({ mensaje: 'Error al crear usuario', error: error.message }); 
@@ -326,6 +339,18 @@ async function actualizarUsuario(req, res) {
   try {
     const { id } = req.params;
     const datosUsuario = req.body;
+
+    if (datosUsuario.TelefonoMovil && datosUsuario.TelefonoMovil.length > 30) {
+      return res.status(400).json({ mensaje: 'El teléfono móvil no puede exceder 30 caracteres.' });
+    }
+
+    if (datosUsuario.Password) {
+      const politica = await obtenerPoliticaPorSucursal(datosUsuario.IdSucursal);
+      const resultado = validarPasswordContraPolitica(datosUsuario.Password, politica);
+      if (!resultado.valido) {
+        return res.status(400).json({ mensaje: resultado.mensaje });
+      }
+    }
 
     await usuarioModel.actualizar(id, datosUsuario);
 
