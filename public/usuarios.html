@@ -40,7 +40,7 @@
             </div>
             <div class="col-md-2">
                 <label class="form-label small mb-1">Teléfono Móvil</label>
-                <input type="text" class="form-control" id="TelefonoMovil">
+                <input type="text" class="form-control" id="TelefonoMovil" maxlength="30">
             </div>
             <div class="col-md-3">
                 <label class="form-label small mb-1">Contraseña</label>
@@ -83,8 +83,8 @@
 
             <!-- Botones -->
             <div class="col-12 text-end mt-4">
-                <button type="button" class="btn btn-primary px-4" id="btnGuardar">Guardar</button>
-                <button type="button" class="btn btn-danger px-4 d-none" id="btnEliminarTop">Eliminar</button>
+                <button type="button" class="btn btn-primary px-4" id="btnGuardar" data-permiso="Alta">Guardar</button>
+                <button type="button" class="btn btn-danger px-4 d-none" id="btnEliminarTop" data-permiso="Baja">Eliminar</button>
                 <button type="button" class="btn btn-light px-4 border" id="btnLimpiar">Nuevo</button>
             </div>
         </form>

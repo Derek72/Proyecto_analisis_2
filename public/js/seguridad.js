@@ -1,10 +1,20 @@
 // /js/seguridad.js
 
+// --- GUARD CONTRA BFCACHE ---
+// Si el navegador restaura esta página desde su caché de historial (botón Atrás/Adelante)
+// sin volver a cargarla de verdad, este listener revisa otra vez si sigue habiendo sesión.
+// Se ejecuta automáticamente en TODA página que incluya este archivo.
+window.addEventListener('pageshow', function () {
+    if (!localStorage.getItem('usuario')) {
+        window.top.location.replace('/');
+    }
+});
+
 // --- PRIMERA FUNCIÓN ---
 function aplicarPermisos(nombrePantalla) {
     const usuarioStr = localStorage.getItem('usuario');
     if (!usuarioStr) {
-        window.location.href = '/index.html'; // No está logueado
+        window.top.location.href = '/'; // No está logueado
         return null;
     }
 
@@ -14,7 +24,11 @@ function aplicarPermisos(nombrePantalla) {
     // Si no tiene permisos para consultar, lo sacamos de la pantalla
     if (!permisosModulo || permisosModulo.Consultar === 0) {
         alert("No tienes permisos para ver esta pantalla.");
-        window.location.href = '/dashboard.html';
+        // Usamos window.top porque estas páginas se cargan dentro del <iframe name="contentFrame">
+        // del dashboard. Si usáramos window.location aquí, navegaríamos solo el iframe y
+        // terminaríamos cargando dashboard.html (con su propio sidebar) DENTRO del iframe,
+        // duplicando visualmente el menú.
+        window.top.location.href = '/dashboard.html';
         return null;
     }
 
@@ -29,8 +43,22 @@ function aplicarPermisos(nombrePantalla) {
         }
     });
 
+    // Guardamos los permisos de esta pantalla en global para que las pantallas
+    // que agregan botones DESPUÉS (p.ej. filas de tabla creadas dinámicamente,
+    // como Editar/Eliminar por usuario en la lista) también puedan consultarlos,
+    // ya que ese contenido no existe todavía cuando corre el querySelectorAll de arriba.
+    window.permisosPantallaActual = permisosModulo;
+
     return usuario;
 } // <-- AQUÍ SE CIERRA LA PRIMERA FUNCIÓN
+
+// Oculta un elemento (botón, ícono, etc.) si la pantalla actual no tiene el
+// permiso indicado. Pensado para usarse al construir HTML dinámico (filas de
+// tabla) después de que aplicarPermisos() ya corrió.
+function tienePermiso(accion) {
+    if (!window.permisosPantallaActual) return false; // por seguridad, si aún no se sabe, se oculta
+    return window.permisosPantallaActual[accion] !== 0;
+}
 
 
 // --- SEGUNDA FUNCIÓN ---
