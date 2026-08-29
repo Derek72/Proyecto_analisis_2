@@ -56,4 +56,21 @@ async function verificarPermiso(idRole, nombreOpcion, tipoPermiso) {
   return rows.length > 0 ? rows[0].TienePermiso : 0;
 }
 
-module.exports = { obtenerMatrizPermisos, guardarPermiso, verificarPermiso };
+async function obtenerPermisosPorRole(idRole) {
+  const sql = `
+    SELECT 
+      o.Nombre AS Opcion,
+      COALESCE(ro.Consultar, 0) AS Consultar,
+      COALESCE(ro.Alta, 0) AS Alta,
+      COALESCE(ro.Baja, 0) AS Baja,
+      COALESCE(ro.Cambio, 0) AS Cambio,
+      COALESCE(ro.Imprimir, 0) AS Imprimir,
+      COALESCE(ro.Exportar, 0) AS Exportar
+    FROM OPCION o
+    LEFT JOIN ROLE_OPCION ro ON o.IdOpcion = ro.IdOpcion AND ro.IdRole = ?
+  `;
+  const [rows] = await db.query(sql, [idRole]);
+  return rows;
+}
+
+module.exports = { obtenerMatrizPermisos, guardarPermiso, verificarPermiso, obtenerPermisosPorRole };

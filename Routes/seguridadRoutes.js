@@ -6,8 +6,8 @@ const seguridadController = require('../Controller/seguridadController.js');
 const { verificarPermisos } = require('../Middleware/autorizacion.js');
 
 
-router.get('/modulos', verificarPermisos('Módulos', 'Consultar'), seguridadController.obtenerModulos);
-router.get('/menus', verificarPermisos('Menús', 'Consultar'), seguridadController.obtenerMenus);
+router.get('/modulos', verificarPermisos('Modulos', 'Consultar'), seguridadController.obtenerModulos);
+router.get('/menus', verificarPermisos('Menus', 'Consultar'), seguridadController.obtenerMenus);
 router.get('/opciones', verificarPermisos('Opciones', 'Consultar'), seguridadController.obtenerOpciones);
 router.get('/roles', verificarPermisos('Roles', 'Consultar'), seguridadController.obtenerRoles);
 router.post('/roles', verificarPermisos('Roles', 'Alta'), seguridadController.crearRole);

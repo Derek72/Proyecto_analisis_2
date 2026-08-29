@@ -1,5 +1,6 @@
 const usuarioModel = require('../Model/usuarioModel.js');
 const bitacoraModel = require('../Model/bitacoraModel.js');
+const roleOpcionModel = require('../Model/roleOpcionModel.js');
 const bcrypt = require('bcrypt');
 
 async function login(req, res) {
@@ -47,7 +48,7 @@ async function login(req, res) {
     if (!passwordValida) {
       const intentos = await usuarioModel.registrarIntentoFallido(Username, usuario.IntentosDeAcceso || 0);
 
-      if (intentos >= 3) {
+      if (intentos >= 5) {
 
         await usuarioModel.bloquearUsuario(Username, 3);
         
@@ -56,11 +57,11 @@ async function login(req, res) {
           IdTipoAcceso: 3,
           DireccionIp: ipOrigen,
           HttpUserAgent: navegador,
-          Acceso: 'Cuenta bloqueada automáticamente tras alcanzar 3 intentos fallidos.'
+          Acceso: 'Cuenta bloqueada automáticamente tras alcanzar 5 intentos fallidos.'
         });
 
         return res.status(403).json({ 
-          mensaje: 'Has superado el límite de 3 intentos fallidos. Tu cuenta ha sido bloqueada.' 
+          mensaje: 'Has superado el límite de 5 intentos fallidos. Tu cuenta ha sido bloqueada.' 
         });
       } else {
 
@@ -69,11 +70,11 @@ async function login(req, res) {
           IdTipoAcceso: 2,
           DireccionIp: ipOrigen,
           HttpUserAgent: navegador,
-          Acceso: `Contraseña incorrecta. Intento ${intentos} de 3.`
+          Acceso: `Contraseña incorrecta. Intento ${intentos} de 5.`
         });
 
         return res.status(401).json({ 
-          mensaje: `Contraseña incorrecta. Te quedan ${3 - intentos} intento(s) antes de bloquearte.` 
+          mensaje: `Contraseña incorrecta. Te quedan ${5 - intentos} intento(s) antes de bloquearte.` 
         });
       }
     }
@@ -88,13 +89,17 @@ async function login(req, res) {
       Acceso: 'Inicio de sesión exitoso'
     });
 
+    const permisos = await roleOpcionModel.obtenerPermisosPorRole(usuario.IdRole);
+
     res.json({
       mensaje: '¡Inicio de sesión exitoso!',
       usuario: {
         id: usuario.IdUsuario,
         nombre: `${usuario.Nombre} ${usuario.Apellido}`,
         correo: usuario.CorreoElectronico,
-        rol: usuario.NombreRole
+        rol: usuario.NombreRole,
+        idRole: usuario.IdRole,
+        permisos: permisos
       }
     });
 
@@ -103,4 +108,39 @@ async function login(req, res) {
   }
 }
 
-module.exports = { login };
+async function obtenerPregunta(req, res) {
+  try {
+    const { idUsuario } = req.params;
+    const usuario = await usuarioModel.obtenerPorId(idUsuario);
+    if (!usuario) {
+      return res.status(404).json({ mensaje: 'No existe un usuario con ese nombre.' });
+    }
+    const datos = await usuarioModel.obtenerPregunta(idUsuario);
+    res.json({ Pregunta: datos.Pregunta });
+  } catch (error) { res.status(500).json({ error: error.message }); }
+}
+
+async function recuperarPassword(req, res) {
+  try {
+    const { IdUsuario, Respuesta, NuevaPassword } = req.body;
+
+    if (!IdUsuario || !Respuesta || !NuevaPassword) {
+      return res.status(400).json({ mensaje: 'Faltan datos para recuperar la contraseña.' });
+    }
+
+    const usuario = await usuarioModel.obtenerPorId(IdUsuario);
+    if (!usuario) {
+      return res.status(404).json({ mensaje: 'No existe un usuario con ese nombre.' });
+    }
+
+    const respuestaCorrecta = await usuarioModel.verificarRespuesta(IdUsuario, Respuesta);
+    if (!respuestaCorrecta) {
+      return res.status(401).json({ mensaje: 'La respuesta no es correcta.' });
+    }
+
+    await usuarioModel.restablecerPassword(IdUsuario, NuevaPassword);
+    res.json({ mensaje: 'Contraseña restablecida exitosamente. Ya puedes iniciar sesión.' });
+  } catch (error) { res.status(500).json({ error: error.message }); }
+}
+
+module.exports = { login, obtenerPregunta, recuperarPassword };
