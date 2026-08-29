@@ -22,6 +22,20 @@ app.use(cors({
 
 app.use(express.json());
 
+// Evita que el navegador guarde las páginas .html en caché (incluida la "back-forward cache").
+// Se configura con el setHeaders de express.static, que corre DESPUÉS de sus headers por
+// defecto — si lo pusiéramos en un middleware aparte antes de este, express.static lo pisaba
+// con su propio "Cache-Control: public, max-age=0" y el navegador seguía cacheando la página.
+app.use(express.static('public', {
+  setHeaders: (res, path) => {
+    if (path.endsWith('.html')) {
+      res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+      res.set('Pragma', 'no-cache');
+      res.set('Expires', '0');
+    }
+  }
+}));
+
 // Registro de Endpoints
 app.use('/auth', authRoutes);
 app.use('/usuario', usuarioRoutes);
