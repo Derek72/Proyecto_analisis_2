@@ -18,10 +18,10 @@ router.delete('/sucursales/:id', verificarPermisos('Sucursales', 'Baja'), catalo
 router.get('/sucursales/empresa/:id', verificarPermisos('Sucursales', 'Consultar'), catalogoController.obtenerSucursalesPorEmpresa);
 
 //RUTAS PARA GENEROS
-router.get('/generos', verificarPermisos('Géneros', 'Consultar'), catalogoController.obtenerGeneros);
-router.post('/generos', verificarPermisos('Géneros', 'Alta'), catalogoController.crearGenero);
-router.put('/generos/:id', verificarPermisos('Géneros', 'Cambio'), catalogoController.actualizarGenero);
-router.delete('/generos/:id', verificarPermisos('Géneros', 'Baja'), catalogoController.eliminarGenero);
+router.get('/generos', verificarPermisos('Generos', 'Consultar'), catalogoController.obtenerGeneros);
+router.post('/generos', verificarPermisos('Generos', 'Alta'), catalogoController.crearGenero);
+router.put('/generos/:id', verificarPermisos('Generos', 'Cambio'), catalogoController.actualizarGenero);
+router.delete('/generos/:id', verificarPermisos('Generos', 'Baja'), catalogoController.eliminarGenero);
 
 //RUTAS PARA STATUS USUARIOS
 router.get('/estatus-usuarios', verificarPermisos('Estatus Usuario', 'Consultar'), catalogoController.obtenerStatusUsuarios);

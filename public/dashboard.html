@@ -4,6 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Consola del Sistema</title>
+    <!-- GUARD DE SESIÓN: si no hay usuario logueado, fuera de aquí antes de mostrar nada.
+         Corre en la carga inicial Y en 'pageshow' (cubre cuando el navegador restaura
+         esta página desde el historial con el botón Atrás/Adelante). -->
+    <script>
+        function validarSesionDashboard() {
+            if (!localStorage.getItem('usuario')) {
+                window.location.replace('/');
+            }
+        }
+        validarSesionDashboard();
+        window.addEventListener('pageshow', validarSesionDashboard);
+    </script>
     <!-- CSS de Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Iconos de Bootstrap -->
@@ -23,9 +35,9 @@
     <!-- HEADER -->
     <header class="d-flex justify-content-between align-items-center p-3 border-bottom bg-white shadow-sm">
         <!-- Logo -->
-        <div class="border p-2 px-4 fs-4 fw-bold">
-            LOGO
-        </div>
+ <div class="border p-2 px-4 logo-placeholder">
+    LOGO
+</div>
         
         <!-- Icono de Usuario y Menú -->
         <div class="dropdown">
@@ -33,8 +45,8 @@
                 <i class="bi bi-person fs-3"></i>
             </button>
             <ul class="dropdown-menu dropdown-menu-end shadow">
-                <li><a class="dropdown-item" href="#">Perfil</a></li>
-                <li><a class="dropdown-item" href="#">Cambiar Password</a></li>
+                <li><a class="dropdown-item" href="/perfil.html" target="contentFrame">Perfil</a></li>
+                <li><a class="dropdown-item" href="/cambiar_password.html" target="contentFrame">Cambiar Password</a></li>
                 <li><hr class="dropdown-divider"></li>
                 <li><button class="dropdown-item text-danger" id="btnLogout">Cerrar Sesión</button></li>
             </ul>
@@ -50,9 +62,6 @@
             <div class="mb-3">
                 <div class="menu-title fw-bold mb-2">Seguridad</div>
                <ul class="nav flex-column ms-3">
-    <li class="nav-item">
-        <a class="nav-link py-1" href="#" id="menu-parametros">Parametros Generales</a>
-    </li>
     <li class="nav-item">
         <!-- AGREGADO target="contentFrame" -->
         <a href="/empresas.html" target="contentFrame" class="nav-link">
@@ -101,6 +110,12 @@
             <i class="bi bi-ui-checks-grid me-2"></i> Opciones
         </a>
     </li>
+    <li class="nav-item">
+        <!-- AGREGADO target="contentFrame" -->
+        <a class="nav-link py-1" href="/permisos.html" target="contentFrame" id="menu-permisos">
+            <i class="bi bi-key me-2"></i> Asignación de Opciones a un Rol
+        </a>
+    </li>
         <li class="nav-item">
         <!-- AGREGADO target="contentFrame" -->
         <a class="nav-link py-1" href="/usuarios.html" target="contentFrame" id="menu-usuarios">
@@ -123,5 +138,13 @@
 
     <!-- JS de Bootstrap para que el menú del usuario se despliegue -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+   
+    <script>
+        document.getElementById('btnLogout').addEventListener('click', () => {
+            localStorage.removeItem('usuario');
+            window.location.href = '/';
+        });
+    </script>
+    <script src="/js/logo.js"></script>
 </body>
 </html>
