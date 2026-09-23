@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Recuperar Contraseña</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light d-flex justify-content-center align-items-center vh-100">
+    <div class="card p-4 shadow-sm" style="width: 100%; max-width: 400px;">
+        <div class="text-center mb-4 border rounded p-4 fs-3 fw-bold">LOGO</div>
+        <h5 class="text-muted mb-3 border-bottom pb-2">Recuperar Contraseña</h5>
+
+        <div id="mensaje" class="alert d-none text-center small p-2 mb-3" role="alert"></div>
+
+        <!-- PASO 1: pedir el usuario -->
+        <form id="formPaso1">
+            <div class="mb-3">
+                <label class="form-label text-secondary small">Usuario:</label>
+                <input type="text" id="idUsuario" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-info text-white w-100 fw-bold mb-2">Continuar</button>
+        </form>
+
+        <!-- PASO 2: pregunta de seguridad + nueva contraseña -->
+        <form id="formPaso2" class="d-none">
+            <div class="mb-3">
+                <label class="form-label text-secondary small" id="labelPregunta">Pregunta de seguridad</label>
+                <input type="text" id="respuesta" class="form-control" placeholder="Tu respuesta" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label text-secondary small">Nueva contraseña:</label>
+                <input type="password" id="nuevaPassword" class="form-control" required minlength="6">
+            </div>
+            <div class="mb-4">
+                <label class="form-label text-secondary small">Confirmar nueva contraseña:</label>
+                <input type="password" id="confirmarPassword" class="form-control" required minlength="6">
+            </div>
+            <button type="submit" class="btn btn-success text-white w-100 fw-bold mb-2">Restablecer contraseña</button>
+        </form>
+
+        <a href="/index.html" class="text-info text-decoration-none small">Volver al inicio de sesión</a>
+    </div>
+    <script src="/js/recuperar.js"></script>
+</body>
+</html>

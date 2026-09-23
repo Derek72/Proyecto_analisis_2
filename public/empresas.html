@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Catálogo de Empresas</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        /* Ocultar formulario, botones y columna de acciones al imprimir */
+        @media print {
+            .no-print, .btn, th:last-child, td:last-child { display: none !important; }
+            body { padding: 0 !important; }
+            .shadow-sm { box-shadow: none !important; border: none !important; }
+        }
+    </style>
+</head>
+<body class="bg-white p-4">
+
+    <!-- ÁREA DEL FORMULARIO (Sin modal) -->
+    <div class="border p-4 rounded shadow-sm mb-4 no-print">
+        <h4 class="mb-3 text-secondary border-bottom pb-2">
+            <i class="bi bi-building me-2"></i>Gestión de Empresas
+        </h4>
+        
+        <form id="formEmpresa">
+            <input type="hidden" id="IdEmpresa">
+            
+            <h6 class="text-primary mt-3 mb-3">Información General</h6>
+            <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <label class="form-label small text-muted mb-1">Nombre</label>
+                    <input type="text" class="form-control" id="Nombre" required>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label small text-muted mb-1">NIT</label>
+                    <input type="text" class="form-control" id="Nit" required>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label small text-muted mb-1">Dirección</label>
+                    <input type="text" class="form-control" id="Direccion" required>
+                </div>
+            </div>
+
+            <h6 class="text-primary border-bottom pb-2 mb-3">Políticas de Seguridad de Contraseñas</h6>
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label small">Min. Mayúsculas</label>
+                    <input type="number" class="form-control form-control-sm" id="PasswordCantidadMayusculas" min="0" required>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small">Min. Minúsculas</label>
+                    <input type="number" class="form-control form-control-sm" id="PasswordCantidadMinusculas" min="0" required>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small">Min. Números</label>
+                    <input type="number" class="form-control form-control-sm" id="PasswordCantidadNumeros" min="0" required>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small">Min. Caracteres Esp.</label>
+                    <input type="number" class="form-control form-control-sm" id="PasswordCantidadCaracteresEspeciales" min="0" required>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small">Longitud Mínima</label>
+                    <input type="number" class="form-control form-control-sm" id="PasswordLargo" min="1" required>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small">Intentos Bloqueo</label>
+                    <input type="number" class="form-control form-control-sm" id="PasswordIntentosAntesDeBloquear" min="1" required>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small">Preguntas Recup.</label>
+                    <input type="number" class="form-control form-control-sm" id="PasswordCantidadPreguntasValidar" min="0" required>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small">Días Vigencia</label>
+                    <input type="number" class="form-control form-control-sm" id="PasswordCantidadCaducidadDias" min="0" required>
+                </div>
+            </div>
+
+            <!-- Botones del Formulario -->
+            <div class="col-12 mt-4 pt-3 border-top">
+                <button type="button" class="btn btn-primary px-4 me-2" id="btnCrear" data-permiso="Alta">Crear</button>
+                <button type="button" class="btn btn-primary px-4 me-2 d-none" id="btnActualizar" data-permiso="Cambio">Guardar Cambios</button>
+                <button type="button" class="btn btn-danger px-4 me-2 d-none" id="btnEliminarTop" data-permiso="Baja">Eliminar</button>
+                <button type="button" class="btn btn-light px-4 border" id="btnLimpiar">Limpiar / Nuevo</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- ÁREA DE LA TABLA -->
+    <div class="border p-4 rounded shadow-sm">
+        <div class="d-flex justify-content-end mb-3 no-print">
+            <button class="btn btn-sm btn-outline-secondary me-2" data-permiso="Imprimir" id="btnImprimir">
+                <i class="bi bi-printer"></i> Imprimir
+            </button>
+            <button class="btn btn-sm btn-outline-success" data-permiso="Exportar" id="btnExportar">
+                <i class="bi bi-file-excel"></i> Exportar
+            </button>
+        </div>
+
+        <table class="table table-striped table-hover border text-center align-middle" id="tablaEmpresas">
+            <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>NIT</th>
+                    <th>Dirección</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="tablaEmpresasBody">
+                <!-- Llenado dinámico -->
+            </tbody>
+        </table>
+    </div>
+
+    <script src="/js/seguridad.js"></script>
+    <script src="/js/empresas.js"></script>
+</body>
+</html>
