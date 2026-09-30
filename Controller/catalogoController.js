@@ -8,6 +8,12 @@ const menuModel = require('../Model/menuModel.js');
 const opcionModel = require('../Model/opcionModel.js');
 const usuarioModel = require('../Model/usuarioModel.js');
 const { validarPasswordContraPolitica, obtenerPoliticaPorSucursal } = require('../Utils/passwordPolicy.js');
+const estadoCivilModel = require('../Model/estadoCivilModel.js');
+const statusEmpleadoModel = require('../Model/statusEmpleadoModel.js');
+const flujoStatusEmpleadoModel = require('../Model/flujoStatusEmpleadoModel.js');
+const tipoDocumentoModel = require('../Model/tipoDocumentoModel.js');
+const departamentoModel = require('../Model/departamentoModel.js');
+const puestoModel = require('../Model/puestoModel.js');
 
 //empresas
 async function obtenerEmpresas(req, res) {
@@ -373,6 +379,274 @@ async function eliminarUsuario(req, res) {
         res.status(500).json({ mensaje: 'Error al eliminar', error: error.message }); 
     }
 }
+// --- ESTADOS CIVILES ---
+async function obtenerEstadosCiviles(req, res) {
+    try {
+        const estadosCiviles = await estadoCivilModel.obtenerTodos();
+        res.json(estadosCiviles);
+    } catch (error) {
+        res.status(500).json({ mensaje: 'Error al obtener estados civiles', error: error.message });
+    }
+}
+
+// --- catalogoController.js ---
+
+async function crearEstadoCivil(req, res) {
+    try {
+        const { Nombre, UsuarioCreacion } = req.body;
+        // Agrega llaves {} para enviarlo como el objeto 'datos' que espera el modelo
+        await estadoCivilModel.crear({ Nombre, UsuarioCreacion }); 
+        res.status(201).json({ mensaje: 'Estado civil creado exitosamente' });
+    } catch (error) {
+        res.status(500).json({ mensaje: 'Error al crear estado civil', error: error.message });
+    }
+}
+
+async function actualizarEstadoCivil(req, res) {
+    try {
+        const { id } = req.params;
+        const { Nombre, UsuarioModificacion } = req.body;
+        // Agrega llaves {} para el segundo parámetro
+        await estadoCivilModel.actualizar(id, { Nombre, UsuarioModificacion }); 
+        res.json({ mensaje: 'Estado civil actualizado exitosamente' });
+    } catch (error) {
+        res.status(500).json({ mensaje: 'Error al actualizar estado civil', error: error.message });
+    }
+}
+
+async function eliminarEstadoCivil(req, res) {
+    try {
+        const { id } = req.params;
+        await estadoCivilModel.eliminar(id);
+        res.json({ mensaje: 'Estado civil eliminado exitosamente' });
+    } catch (error) {
+        res.status(500).json({ mensaje: 'Error al eliminar estado civil', error: error.message });
+    }
+}
+
+// --- STATUS EMPLEADOS ---
+async function obtenerStatusEmpleados(req, res) {
+    try {
+        const status = await statusEmpleadoModel.obtenerTodos();
+        res.json(status);
+    } catch (error) {
+        res.status(500).json({ mensaje: 'Error al obtener status de empleados', error: error.message });
+    }
+}
+
+async function crearStatusEmpleado(req, res) {
+    try {
+        const { Nombre, UsuarioCreacion } = req.body;
+        await statusEmpleadoModel.crear({ Nombre, UsuarioCreacion });
+        res.status(201).json({ mensaje: 'Status de empleado creado exitosamente' });
+    } catch (error) {
+        res.status(500).json({ mensaje: 'Error al crear status de empleado', error: error.message });
+    }
+}
+
+async function actualizarStatusEmpleado(req, res) {
+    try {
+        const { id } = req.params;
+        const { Nombre, UsuarioModificacion } = req.body;
+        await statusEmpleadoModel.actualizar(id, { Nombre, UsuarioModificacion });
+        res.json({ mensaje: 'Status de empleado actualizado exitosamente' });
+    } catch (error) {
+        res.status(500).json({ mensaje: 'Error al actualizar status de empleado', error: error.message });
+    }
+}
+
+async function eliminarStatusEmpleado(req, res) {
+    try {
+        const { id } = req.params;
+        await statusEmpleadoModel.eliminar(id);
+        res.json({ mensaje: 'Status de empleado eliminado exitosamente' });
+    } catch (error) {
+        res.status(500).json({ mensaje: 'Error al eliminar status de empleado', error: error.message });
+    }
+}
+
+// --- FLUJO STATUS EMPLEADO ---
+// --- 2. Funciones para Flujo Status Empleado ---
+async function obtenerFlujosStatus(req, res) {
+    try {
+        const flujos = await flujoStatusEmpleadoModel.obtenerTodos();
+        res.json(flujos);
+    } catch (error) {
+        res.status(500).json({ mensaje: 'Error al obtener los flujos de status', error: error.message });
+    }
+}
+
+async function crearFlujoStatus(req, res) {
+    try {
+        const { IdStatusActual, IdStatusNuevo, NombreEvento, UsuarioCreacion } = req.body;
+
+        if (IdStatusActual === IdStatusNuevo) {
+            return res.status(400).json({ mensaje: 'El status actual y el nuevo no pueden ser el mismo.' });
+        }
+
+        await flujoStatusEmpleadoModel.crear({ IdStatusActual, IdStatusNuevo, NombreEvento, UsuarioCreacion });
+        res.status(201).json({ mensaje: 'Flujo de status creado exitosamente' });
+    } catch (error) {
+        if (error.code === 'ER_DUP_ENTRY') {
+            return res.status(400).json({ mensaje: 'Esta transición entre estados ya se encuentra registrada.' });
+        }
+        res.status(500).json({ mensaje: 'Error al crear flujo de status', error: error.message });
+    }
+}
+
+async function actualizarFlujoStatus(req, res) {
+    try {
+        const { idActual, idNuevo } = req.params;
+        const { NombreEvento, UsuarioModificacion } = req.body;
+        await flujoStatusEmpleadoModel.actualizar(idActual, idNuevo, { NombreEvento, UsuarioModificacion });
+        res.json({ mensaje: 'Flujo de status actualizado exitosamente' });
+    } catch (error) {
+        res.status(500).json({ mensaje: 'Error al actualizar flujo de status', error: error.message });
+    }
+}
+
+async function eliminarFlujoStatus(req, res) {
+    try {
+        const { idActual, idNuevo } = req.params;
+        await flujoStatusEmpleadoModel.eliminar(idActual, idNuevo);
+        res.json({ mensaje: 'Flujo de status eliminado exitosamente' });
+    } catch (error) {
+        res.status(500).json({ mensaje: 'Error al eliminar flujo de status', error: error.message });
+    }
+}
+
+// Tipo de Documento
+async function obtenerTiposDocumentos(req, res) {
+    try {
+        const tipos = await tipoDocumentoModel.obtenerTodos();
+        res.json(tipos);
+    } catch (error) {
+        res.status(500).json({ mensaje: 'Error al obtener los tipos de documentos', error: error.message });
+    }
+}
+
+async function crearTipoDocumento(req, res) {
+    try {
+        const { Nombre, UsuarioCreacion } = req.body;
+        await tipoDocumentoModel.crear({ Nombre, UsuarioCreacion });
+        res.status(201).json({ mensaje: 'Tipo de documento creado exitosamente' });
+    } catch (error) {
+        res.status(500).json({ mensaje: 'Error al crear el tipo de documento', error: error.message });
+    }
+}
+
+async function actualizarTipoDocumento(req, res) {
+    try {
+        const { id } = req.params;
+        const { Nombre, UsuarioModificacion } = req.body;
+        await tipoDocumentoModel.actualizar(id, { Nombre, UsuarioModificacion });
+        res.json({ mensaje: 'Tipo de documento actualizado exitosamente' });
+    } catch (error) {
+        res.status(500).json({ mensaje: 'Error al actualizar el tipo de documento', error: error.message });
+    }
+}
+
+async function eliminarTipoDocumento(req, res) {
+    try {
+        const { id } = req.params;
+        await tipoDocumentoModel.eliminar(id);
+        res.json({ mensaje: 'Tipo de documento eliminado exitosamente' });
+    } catch (error) {
+        if (error.code === 'ER_ROW_IS_REFERENCED_2') {
+            return res.status(400).json({ mensaje: 'No se puede eliminar porque ya está asignado a una persona.' });
+        }
+        res.status(500).json({ mensaje: 'Error al eliminar el tipo de documento', error: error.message });
+    }
+}
+
+// --- 2. Funciones para Departamentos ---
+async function obtenerDepartamentos(req, res) {
+    try {
+        const departamentos = await departamentoModel.obtenerTodos();
+        res.json(departamentos);
+    } catch (error) {
+        res.status(500).json({ mensaje: 'Error al obtener los departamentos', error: error.message });
+    }
+}
+
+async function crearDepartamento(req, res) {
+    try {
+        const { Nombre, IdEmpresa, UsuarioCreacion } = req.body;
+        await departamentoModel.crear({ Nombre, IdEmpresa, UsuarioCreacion });
+        res.status(201).json({ mensaje: 'Departamento creado exitosamente' });
+    } catch (error) {
+        res.status(500).json({ mensaje: 'Error al crear el departamento', error: error.message });
+    }
+}
+
+async function actualizarDepartamento(req, res) {
+    try {
+        const { id } = req.params;
+        const { Nombre, IdEmpresa, UsuarioModificacion } = req.body;
+        await departamentoModel.actualizar(id, { Nombre, IdEmpresa, UsuarioModificacion });
+        res.json({ mensaje: 'Departamento actualizado exitosamente' });
+    } catch (error) {
+        res.status(500).json({ mensaje: 'Error al actualizar el departamento', error: error.message });
+    }
+}
+
+async function eliminarDepartamento(req, res) {
+    try {
+        const { id } = req.params;
+        await departamentoModel.eliminar(id);
+        res.json({ mensaje: 'Departamento eliminado exitosamente' });
+    } catch (error) {
+        if (error.code === 'ER_ROW_IS_REFERENCED_2') {
+            return res.status(400).json({ mensaje: 'No se puede eliminar porque este departamento ya está asignado a un puesto.' });
+        }
+        res.status(500).json({ mensaje: 'Error al eliminar el departamento', error: error.message });
+    }
+}
+
+// --- 2. Funciones para Puestos ---
+async function obtenerPuestos(req, res) {
+    try {
+        const puestos = await puestoModel.obtenerTodos();
+        res.json(puestos);
+    } catch (error) {
+        res.status(500).json({ mensaje: 'Error al obtener los puestos', error: error.message });
+    }
+}
+
+async function crearPuesto(req, res) {
+    try {
+        const { Nombre, IdDepartamento, UsuarioCreacion } = req.body;
+        await puestoModel.crear({ Nombre, IdDepartamento, UsuarioCreacion });
+        res.status(201).json({ mensaje: 'Puesto creado exitosamente' });
+    } catch (error) {
+        res.status(500).json({ mensaje: 'Error al crear el puesto', error: error.message });
+    }
+}
+
+async function actualizarPuesto(req, res) {
+    try {
+        const { id } = req.params;
+        const { Nombre, IdDepartamento, UsuarioModificacion } = req.body;
+        await puestoModel.actualizar(id, { Nombre, IdDepartamento, UsuarioModificacion });
+        res.json({ mensaje: 'Puesto actualizado exitosamente' });
+    } catch (error) {
+        res.status(500).json({ mensaje: 'Error al actualizar el puesto', error: error.message });
+    }
+}
+
+async function eliminarPuesto(req, res) {
+    try {
+        const { id } = req.params;
+        await puestoModel.eliminar(id);
+        res.json({ mensaje: 'Puesto eliminado exitosamente' });
+    } catch (error) {
+        // Validación por si el puesto ya está asignado a un empleado
+        if (error.code === 'ER_ROW_IS_REFERENCED_2') {
+            return res.status(400).json({ mensaje: 'No se puede eliminar porque este puesto ya está asignado a un empleado o persona.' });
+        }
+        res.status(500).json({ mensaje: 'Error al eliminar el puesto', error: error.message });
+    }
+}
 
 module.exports = {
   obtenerEmpresas, crearEmpresa, actualizarEmpresa, eliminarEmpresa,
@@ -383,5 +657,11 @@ module.exports = {
   obtenerModulos, crearModulo, actualizarModulo, eliminarModulo,
   obtenerMenus, crearMenu, actualizarMenu, eliminarMenu,
   obtenerOpciones, crearOpcion, actualizarOpcion, eliminarOpcion,
-  obtenerUsuarios, crearUsuario, actualizarUsuario, eliminarUsuario
+  obtenerUsuarios, crearUsuario, actualizarUsuario, eliminarUsuario,
+  obtenerEstadosCiviles, crearEstadoCivil, actualizarEstadoCivil, eliminarEstadoCivil,
+  obtenerStatusEmpleados, crearStatusEmpleado, actualizarStatusEmpleado, eliminarStatusEmpleado,
+  obtenerFlujosStatus, crearFlujoStatus, actualizarFlujoStatus, eliminarFlujoStatus,
+  obtenerTiposDocumentos, crearTipoDocumento, actualizarTipoDocumento, eliminarTipoDocumento,
+  obtenerDepartamentos, crearDepartamento, actualizarDepartamento, eliminarDepartamento,
+  obtenerPuestos, crearPuesto, actualizarPuesto, eliminarPuesto
 };
