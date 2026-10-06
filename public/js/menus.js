@@ -11,7 +11,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 2. Luego cargamos los menús para llenar la tabla
     cargarMenus();
 
-    document.getElementById('btnGuardar').addEventListener('click', guardarMenu);
+    document.getElementById('btnCrear').addEventListener('click', guardarMenu);
+    document.getElementById('btnActualizar').addEventListener('click', guardarMenu);
     
     // Validamos si existen los botones extra en el HTML (Eliminar, Imprimir, Exportar)
     const btnEliminar = document.getElementById('btnEliminarTop');
@@ -84,9 +85,13 @@ function dibujarTabla(menus) {
             <td class="fw-bold">${menu.Nombre}</td>
             <td><span class="badge bg-secondary">${menu.OrdenMenu}</span></td>
             <td>
-                <button class="btn btn-sm btn-warning" data-permiso="Cambio" 
+                <button class="btn btn-sm btn-warning me-1" data-permiso="Cambio" 
                     onclick="cargarParaEdicion('${menuJSON}')">
-                    Seleccionar
+                    Editar
+                </button>
+                <button class="btn btn-sm btn-danger" data-permiso="Baja" 
+                    onclick="eliminarDesdeFormulario(${menu.IdMenu})">
+                    Eliminar
                 </button>
             </td>
         `;
@@ -107,6 +112,7 @@ window.cargarParaEdicion = function(menuString) {
     
     const btnEliminar = document.getElementById('btnEliminarTop');
     if(btnEliminar) btnEliminar.classList.remove('d-none');
+    mostrarBotonSegunModo(true);
     
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -117,6 +123,7 @@ function limpiarFormulario() {
     
     const btnEliminar = document.getElementById('btnEliminarTop');
     if(btnEliminar) btnEliminar.classList.add('d-none');
+    mostrarBotonSegunModo(false);
 }
 
 async function guardarMenu() {
@@ -162,8 +169,8 @@ async function guardarMenu() {
     }
 }
 
-async function eliminarDesdeFormulario() {
-    const id = document.getElementById('IdMenu').value;
+async function eliminarDesdeFormulario(idParam) {
+    const id = idParam || document.getElementById('IdMenu').value;
     if (!id || !confirm('¿Estás seguro de eliminar este menú?')) return;
 
     try {

@@ -8,7 +8,8 @@ document.addEventListener('DOMContentLoaded', () => {
     cargarGeneros();
 
     // Eventos de botones
-    document.getElementById('btnGuardar').addEventListener('click', guardarGenero);
+    document.getElementById('btnCrear').addEventListener('click', guardarGenero);
+    document.getElementById('btnActualizar').addEventListener('click', guardarGenero);
     document.getElementById('btnEliminarTop').addEventListener('click', eliminarDesdeFormulario);
     document.getElementById('btnLimpiar').addEventListener('click', limpiarFormulario);
     
@@ -48,9 +49,13 @@ function dibujarTabla(generos) {
             <td>${genero.IdGenero}</td>
             <td class="fw-bold">${genero.Nombre}</td>
             <td>
-                <button class="btn btn-sm btn-warning" data-permiso="Cambio" 
+                <button class="btn btn-sm btn-warning me-1" data-permiso="Cambio" 
                     onclick="cargarParaEdicion('${generoJSON}')">
-                    Seleccionar
+                    Editar
+                </button>
+                <button class="btn btn-sm btn-danger" data-permiso="Baja" 
+                    onclick="eliminarDesdeFormulario(${genero.IdGenero})">
+                    Eliminar
                 </button>
             </td>
         `;
@@ -70,6 +75,7 @@ window.cargarParaEdicion = function(generoString) {
     
     // Mostramos el botón de eliminar
     document.getElementById('btnEliminarTop').classList.remove('d-none');
+    mostrarBotonSegunModo(true);
     
     // Subimos la pantalla suavemente
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -80,19 +86,18 @@ function limpiarFormulario() {
     document.getElementById('formGenero').reset();
     document.getElementById('IdGenero').value = '';
     document.getElementById('btnEliminarTop').classList.add('d-none');
+    mostrarBotonSegunModo(false);
 }
 
 // --- GUARDAR (Alta / Cambio) ---
 async function guardarGenero() {
     const idGenero = document.getElementById('IdGenero').value;
-    // CAMBIO AQUÍ: Usamos id="Nombre"
     const nombre = document.getElementById('Nombre').value.trim();
 
     if (!nombre) {
         return alert("Por favor, ingresa el nombre del género.");
     }
 
-    // CAMBIO AQUÍ: La propiedad ahora es Nombre
     const generoData = {
         Nombre: nombre
     };
@@ -123,21 +128,9 @@ async function guardarGenero() {
     }
 }
 
-// --- SUBIR DATOS AL FORMULARIO ---
-window.cargarParaEdicion = function(generoString) {
-    const genero = JSON.parse(generoString);
-    
-    document.getElementById('IdGenero').value = genero.IdGenero;
-    // CAMBIO AQUÍ: .Nombre
-    document.getElementById('Nombre').value = genero.Nombre;
-    
-    document.getElementById('btnEliminarTop').classList.remove('d-none');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
 // --- ELIMINAR (Baja) ---
-async function eliminarDesdeFormulario() {
-    const id = document.getElementById('IdGenero').value;
+async function eliminarDesdeFormulario(idParam) {
+    const id = idParam || document.getElementById('IdGenero').value;
     if (!id || !confirm('¿Estás seguro de eliminar este género?')) return;
 
     try {

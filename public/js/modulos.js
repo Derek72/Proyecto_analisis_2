@@ -7,7 +7,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     cargarModulos();
 
-    document.getElementById('btnGuardar').addEventListener('click', guardarModulo);
+    document.getElementById('btnCrear').addEventListener('click', guardarModulo);
+    document.getElementById('btnActualizar').addEventListener('click', guardarModulo);
     document.getElementById('btnEliminarTop').addEventListener('click', eliminarDesdeFormulario);
     document.getElementById('btnLimpiar').addEventListener('click', limpiarFormulario);
     
@@ -42,9 +43,13 @@ function dibujarTabla(modulos) {
             <td class="fw-bold">${modulo.Nombre}</td>
             <td><span class="badge bg-secondary">${modulo.OrdenMenu}</span></td>
             <td>
-                <button class="btn btn-sm btn-warning" data-permiso="Cambio" 
+                <button class="btn btn-sm btn-warning me-1" data-permiso="Cambio" 
                     onclick="cargarParaEdicion('${moduloJSON}')">
-                    Seleccionar
+                    Editar
+                </button>
+                <button class="btn btn-sm btn-danger" data-permiso="Baja" 
+                    onclick="eliminarDesdeFormulario(${modulo.IdModulo})">
+                    Eliminar
                 </button>
             </td>
         `;
@@ -61,6 +66,7 @@ window.cargarParaEdicion = function(moduloString) {
     document.getElementById('OrdenMenu').value = modulo.OrdenMenu;
     
     document.getElementById('btnEliminarTop').classList.remove('d-none');
+    mostrarBotonSegunModo(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -68,6 +74,7 @@ function limpiarFormulario() {
     document.getElementById('formModulo').reset();
     document.getElementById('IdModulo').value = '';
     document.getElementById('btnEliminarTop').classList.add('d-none');
+    mostrarBotonSegunModo(false);
 }
 
 async function guardarModulo() {
@@ -104,8 +111,8 @@ async function guardarModulo() {
     }
 }
 
-async function eliminarDesdeFormulario() {
-    const id = document.getElementById('IdModulo').value;
+async function eliminarDesdeFormulario(idParam) {
+    const id = idParam || document.getElementById('IdModulo').value;
     if (!id || !confirm('¿Estás seguro de eliminar este módulo?')) return;
 
     try {

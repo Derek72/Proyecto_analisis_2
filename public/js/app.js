@@ -22,9 +22,16 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         if (response.ok) {
             // Guardamos la información básica del usuario en el navegador
             localStorage.setItem('usuario', JSON.stringify(data.usuario));
-            
-            // Redirección exitosa al Dashboard
-            window.location.href = '/dashboard.html';
+
+            if (data.requiereCambioPassword) {
+                // La contraseña caducó (o el administrador la reseteó): debe cambiarla
+                // antes de poder usar el sistema.
+                localStorage.setItem('mensajeCambioPassword', data.mensaje || 'Debes cambiar tu contraseña para continuar.');
+                window.location.href = '/cambiar_password.html';
+            } else {
+                // Redirección exitosa al Dashboard
+                window.location.href = '/dashboard.html';
+            }
         } else {
             // Muestra los mensajes personalizados que programaste en tu controlador (intentos, bloqueos, etc.)
             divError.textContent = data.mensaje || data.error || "Credenciales incorrectas.";

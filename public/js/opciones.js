@@ -8,7 +8,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     await cargarComboMenus();
     cargarOpciones();
 
-    document.getElementById('btnGuardar').addEventListener('click', guardarOpcion);
+    document.getElementById('btnCrear').addEventListener('click', guardarOpcion);
+    document.getElementById('btnActualizar').addEventListener('click', guardarOpcion);
     document.getElementById('btnEliminarTop').addEventListener('click', eliminarDesdeFormulario);
     document.getElementById('btnLimpiar').addEventListener('click', limpiarFormulario);
     
@@ -60,8 +61,10 @@ function dibujarTabla(opciones) {
             <td class="text-muted small">${opcion.Pagina}</td>
             <td><span class="badge bg-secondary">${opcion.OrdenMenu}</span></td>
             <td>
-                <button class="btn btn-sm btn-warning" data-permiso="Cambio" 
-                    onclick="cargarParaEdicion('${opcionJSON}')">Seleccionar</button>
+                <button class="btn btn-sm btn-warning me-1" data-permiso="Cambio" 
+                    onclick="cargarParaEdicion('${opcionJSON}')">Editar</button>
+                <button class="btn btn-sm btn-danger" data-permiso="Baja" 
+                    onclick="eliminarDesdeFormulario(${opcion.IdOpcion})">Eliminar</button>
             </td>
         `;
         tbody.appendChild(tr);
@@ -78,6 +81,7 @@ window.cargarParaEdicion = function(opcionString) {
     document.getElementById('OrdenMenu').value = opcion.OrdenMenu;
     
     document.getElementById('btnEliminarTop').classList.remove('d-none');
+    mostrarBotonSegunModo(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -85,6 +89,7 @@ function limpiarFormulario() {
     document.getElementById('formOpcion').reset();
     document.getElementById('IdOpcion').value = '';
     document.getElementById('btnEliminarTop').classList.add('d-none');
+    mostrarBotonSegunModo(false);
 }
 
 async function guardarOpcion() {
@@ -117,8 +122,8 @@ async function guardarOpcion() {
     } catch (error) { console.error(error); }
 }
 
-async function eliminarDesdeFormulario() {
-    const id = document.getElementById('IdOpcion').value;
+async function eliminarDesdeFormulario(idParam) {
+    const id = idParam || document.getElementById('IdOpcion').value;
     if (!id || !confirm('¿Eliminar esta opción?')) return;
     try {
         const response = await fetch(`/catalogos/opciones/${id}`, { 

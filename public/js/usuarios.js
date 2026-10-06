@@ -13,7 +13,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         await cargarSucursalesPorEmpresa(e.target.value);
     });
 
-    document.getElementById('btnGuardar').addEventListener('click', guardarUsuario);
+    document.getElementById('btnCrear').addEventListener('click', guardarUsuario);
+    document.getElementById('btnActualizar').addEventListener('click', guardarUsuario);
     document.getElementById('btnLimpiar').addEventListener('click', limpiarFormulario);
     document.getElementById('btnEliminarTop').addEventListener('click', () => {
         const idUsuario = document.getElementById('IdUsuario').value;
@@ -152,6 +153,7 @@ window.cargarParaEdicion = async function(usuarioString) {
     }
 
     document.getElementById('btnEliminarTop').classList.remove('d-none');
+    mostrarBotonSegunModo(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
@@ -257,6 +259,7 @@ function limpiarFormulario() {
     selectSucursal.disabled = true;
 
     document.getElementById('btnEliminarTop').classList.add('d-none');
+    mostrarBotonSegunModo(false);
 }
 
 function obtenerCabecerasSeguridad() {

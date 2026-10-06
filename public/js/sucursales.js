@@ -8,7 +8,8 @@ document.addEventListener('DOMContentLoaded', () => {
     cargarSucursales();
 
     // Eventos de botones
-    document.getElementById('btnGuardar').addEventListener('click', guardarSucursal);
+    document.getElementById('btnCrear').addEventListener('click', guardarSucursal);
+    document.getElementById('btnActualizar').addEventListener('click', guardarSucursal);
     document.getElementById('btnEliminarTop').addEventListener('click', eliminarDesdeFormulario);
     document.getElementById('btnLimpiar').addEventListener('click', limpiarFormulario);
     
@@ -48,9 +49,13 @@ async function cargarSucursales() {
                     <td>${suc.Direccion}</td>
                     <td>${suc.NombreEmpresa}</td>
                     <td>
-                        <button class="btn btn-sm btn-warning" data-permiso="Cambio" 
+                        <button class="btn btn-sm btn-warning me-1" data-permiso="Cambio" 
                             onclick="cargarParaEdicion(${suc.IdSucursal}, '${suc.Nombre}', '${suc.Direccion}', ${suc.IdEmpresa})">
-                            Seleccionar
+                            Editar
+                        </button>
+                        <button class="btn btn-sm btn-danger" data-permiso="Baja" 
+                            onclick="eliminarDesdeFormulario(${suc.IdSucursal})">
+                            Eliminar
                         </button>
                     </td>
                 </tr>
@@ -70,6 +75,7 @@ window.cargarParaEdicion = function(id, nombre, direccion, idEmpresa) {
     // Mostramos el botón de eliminar porque ya hay un registro seleccionado
     const btnEliminar = document.getElementById('btnEliminarTop');
     btnEliminar.classList.remove('d-none');
+    mostrarBotonSegunModo(true);
     
     // Desplazar la pantalla hacia arriba si la tabla es muy larga
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -81,6 +87,7 @@ function limpiarFormulario() {
     document.getElementById('idSucursal').value = '';
     // Ocultar botón eliminar
     document.getElementById('btnEliminarTop').classList.add('d-none');
+    mostrarBotonSegunModo(false);
 }
 
 // --- GUARDAR (ALTA O CAMBIO) ---
@@ -119,8 +126,8 @@ async function guardarSucursal() {
 }
 
 // --- ELIMINAR DESDE EL FORMULARIO ---
-async function eliminarDesdeFormulario() {
-    const id = document.getElementById('idSucursal').value;
+async function eliminarDesdeFormulario(idParam) {
+    const id = idParam || document.getElementById('idSucursal').value;
     if (!id || !confirm('¿Estás seguro de eliminar esta sucursal?')) return;
 
     try {

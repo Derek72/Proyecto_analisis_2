@@ -16,7 +16,8 @@ async function buscarParaLogin(idUsuario, password) {
 async function obtenerPorId(idUsuario) {
   const sql = `
     SELECT u.IdUsuario, u.Password, u.Nombre, u.Apellido, u.CorreoElectronico, u.IdStatusUsuario, 
-           u.IntentosDeAcceso, u.FechaModificacion, u.IdRole, u.IdSucursal, r.Nombre as NombreRole
+           u.IntentosDeAcceso, u.FechaModificacion, u.IdRole, u.IdSucursal, r.Nombre as NombreRole,
+           u.RequiereCambiarPassword, u.UltimaFechaCambioPassword, u.FechaCreacion
     FROM USUARIO u
     INNER JOIN ROLE r ON u.IdRole = r.IdRole
     WHERE u.IdUsuario = ?
@@ -27,7 +28,11 @@ async function obtenerPorId(idUsuario) {
 
 async function registrarIntentoFallido(idUsuario, intentosActuales) {
   const nuevosIntentos = intentosActuales + 1;
-  const sql = `UPDATE USUARIO SET IntentosDeAcceso = ? WHERE IdUsuario = ?`;
+  const sql = `
+    UPDATE USUARIO 
+    SET IntentosDeAcceso = ?, FechaModificacion = NOW(), UsuarioModificacion = 'system' 
+    WHERE IdUsuario = ?
+  `;
   await db.query(sql, [nuevosIntentos, idUsuario]);
   return nuevosIntentos;
 }
@@ -35,7 +40,7 @@ async function registrarIntentoFallido(idUsuario, intentosActuales) {
 async function bloquearUsuario(idUsuario, idStatusBloqueado) {
   const sql = `
     UPDATE USUARIO 
-    SET IdStatusUsuario = ?, FechaModificacion = NOW() 
+    SET IdStatusUsuario = ?, FechaModificacion = NOW(), UsuarioModificacion = 'system' 
     WHERE IdUsuario = ?
   `;
   await db.query(sql, [idStatusBloqueado, idUsuario]);
@@ -44,7 +49,9 @@ async function bloquearUsuario(idUsuario, idStatusBloqueado) {
 async function resetearIntentosYEstado(idUsuario, idStatusActivo) {
   const sql = `
     UPDATE USUARIO 
-    SET IntentosDeAcceso = 0, IdStatusUsuario = ? 
+    SET IntentosDeAcceso = 0, IdStatusUsuario = ?, 
+        UltimaFechaIngreso = NOW(), 
+        FechaModificacion = NOW(), UsuarioModificacion = 'system'
     WHERE IdUsuario = ?
   `;
   await db.query(sql, [idStatusActivo, idUsuario]);
@@ -66,14 +73,14 @@ async function crearUsuario(usuario) {
       Password, IdGenero, IntentosDeAcceso, CorreoElectronico, 
       RequiereCambiarPassword, TelefonoMovil, IdSucursal, 
       Pregunta, Respuesta, IdRole, FechaCreacion, 
-      UsuarioCreacion, FechaModificacion, UsuarioModificacion
+      UsuarioCreacion, UltimaFechaCambioPassword
     )
     VALUES (
       ?, ?, ?, ?, 1, 
       ?, ?, 0, ?, 
       0, ?, ?, 
       ?, ?, ?, NOW(), 
-      ?, NOW(), ?
+      ?, NOW()
     )
   `;
   
@@ -83,7 +90,7 @@ async function crearUsuario(usuario) {
     IdUsuario, Nombre, Apellido, FechaNacimiento, 
     hashedPassword, IdGenero, CorreoElectronico, 
     TelefonoMovil, IdSucursal, Pregunta, Respuesta, 
-    IdRole, creador, creador
+    IdRole, creador
   ]);
 }
 
@@ -132,6 +139,7 @@ async function actualizarPasswordAdmin(idUsuario, nuevaPassword, usuarioModifica
   const sql = `
     UPDATE USUARIO SET
       Password = ?, RequiereCambiarPassword = 1,
+      UltimaFechaCambioPassword = NOW(),
       FechaModificacion = NOW(), UsuarioModificacion = ?
     WHERE IdUsuario = ?
   `;
@@ -141,6 +149,16 @@ async function actualizarPasswordAdmin(idUsuario, nuevaPassword, usuarioModifica
 
 async function eliminar(idUsuario) {
   await db.query('DELETE FROM USUARIO WHERE IdUsuario = ?', [idUsuario]);
+}
+
+async function marcarRequiereCambioPassword(idUsuario) {
+  const sql = `
+    UPDATE USUARIO SET
+      RequiereCambiarPassword = 1,
+      FechaModificacion = NOW(), UsuarioModificacion = 'system'
+    WHERE IdUsuario = ?
+  `;
+  await db.query(sql, [idUsuario]);
 }
 
 async function obtenerParaPerfil(idUsuario) {
@@ -172,6 +190,7 @@ async function cambiarPasswordPropia(idUsuario, nuevaPassword) {
   const sql = `
     UPDATE USUARIO SET
       Password = ?, RequiereCambiarPassword = 0,
+      UltimaFechaCambioPassword = NOW(),
       FechaModificacion = NOW(), UsuarioModificacion = ?
     WHERE IdUsuario = ?
   `;
@@ -195,7 +214,8 @@ async function restablecerPassword(idUsuario, nuevaPassword) {
   const sql = `
     UPDATE USUARIO SET
       Password = ?, RequiereCambiarPassword = 0, IntentosDeAcceso = 0,
-      IdStatusUsuario = 1, FechaModificacion = NOW(), UsuarioModificacion = ?
+      IdStatusUsuario = 1, UltimaFechaCambioPassword = NOW(),
+      FechaModificacion = NOW(), UsuarioModificacion = ?
     WHERE IdUsuario = ?
   `;
   await db.query(sql, [hashedPassword, idUsuario, idUsuario]);
@@ -212,6 +232,7 @@ module.exports = {
   actualizar,
   actualizarPasswordAdmin,
   eliminar,
+  marcarRequiereCambioPassword,
   obtenerParaPerfil,
   actualizarPerfil,
   cambiarPasswordPropia,

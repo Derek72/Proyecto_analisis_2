@@ -12,6 +12,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!usuarioStr) { window.top.location.href = '/'; return; }
     usuarioActual = JSON.parse(usuarioStr);
 
+    const mensajeForzado = localStorage.getItem('mensajeCambioPassword');
+    if (mensajeForzado) {
+        mostrarMensaje(mensajeForzado, 'warning');
+        localStorage.removeItem('mensajeCambioPassword');
+    }
+
     document.getElementById('formPassword').addEventListener('submit', cambiarPassword);
 });
 
@@ -42,8 +48,10 @@ async function cambiarPassword(evento) {
         const result = await response.json();
 
         if (response.ok) {
-            mostrarMensaje('Contraseña actualizada correctamente.', 'success');
+            mostrarMensaje('Contraseña actualizada correctamente. Vuelve a iniciar sesión.', 'success');
             document.getElementById('formPassword').reset();
+            localStorage.removeItem('usuario');
+            setTimeout(() => { window.top.location.href = '/'; }, 1500);
         } else {
             mostrarMensaje(result.mensaje || 'No se pudo cambiar la contraseña.', 'danger');
         }

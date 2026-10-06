@@ -8,7 +8,8 @@ document.addEventListener('DOMContentLoaded', () => {
     cargarEmpresas();
 
     // Eventos de botones principales
-    document.getElementById('btnGuardarEmpresa').addEventListener('click', guardarEmpresa);
+    document.getElementById('btnCrear').addEventListener('click', guardarEmpresa);
+    document.getElementById('btnActualizar').addEventListener('click', guardarEmpresa);
     document.getElementById('btnEliminarTop').addEventListener('click', eliminarDesdeFormulario);
     document.getElementById('btnLimpiar').addEventListener('click', limpiarFormulario);
     
@@ -50,9 +51,13 @@ function dibujarTabla(empresas) {
             <td>${empresa.Nit}</td>
             <td>${empresa.Direccion}</td>
             <td>
-                <button class="btn btn-sm btn-warning" data-permiso="Cambio" 
+                <button class="btn btn-sm btn-warning me-1" data-permiso="Cambio" 
                     onclick="cargarParaEdicion('${empresaJSON}')">
-                    Seleccionar
+                    Editar
+                </button>
+                <button class="btn btn-sm btn-danger" data-permiso="Baja" 
+                    onclick="eliminarDesdeFormulario(${empresa.IdEmpresa})">
+                    Eliminar
                 </button>
             </td>
         `;
@@ -83,6 +88,7 @@ window.cargarParaEdicion = function(empresaString) {
 
     // Mostramos el botón de eliminar porque hay un registro seleccionado
     document.getElementById('btnEliminarTop').classList.remove('d-none');
+    mostrarBotonSegunModo(true);
     
     // Desplazar la pantalla hacia arriba
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -94,6 +100,7 @@ function limpiarFormulario() {
     document.getElementById('IdEmpresa').value = '';
     // Ocultar botón eliminar
     document.getElementById('btnEliminarTop').classList.add('d-none');
+    mostrarBotonSegunModo(false);
 }
 
 // 5. FUNCIÓN PARA GUARDAR (Alta o Cambio)
@@ -144,9 +151,11 @@ async function guardarEmpresa() {
     }
 }
 
-// 6. ELIMINAR DESDE EL FORMULARIO
-async function eliminarDesdeFormulario() {
-    const id = document.getElementById('IdEmpresa').value;
+// 6. ELIMINAR (independiente de si el registro está cargado en el formulario:
+//    puede venir del botón "Eliminar" de la fila -con idParam- o del botón
+//    superior "Eliminar" del formulario -sin argumento, toma el ID cargado-)
+async function eliminarDesdeFormulario(idParam) {
+    const id = idParam || document.getElementById('IdEmpresa').value;
     if (!id || !confirm('¿Estás seguro de eliminar esta empresa?')) return;
 
     try {

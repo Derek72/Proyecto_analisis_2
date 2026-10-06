@@ -7,7 +7,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     cargarRoles();
 
-    document.getElementById('btnGuardar').addEventListener('click', guardarRol);
+    document.getElementById('btnCrear').addEventListener('click', guardarRol);
+    document.getElementById('btnActualizar').addEventListener('click', guardarRol);
     document.getElementById('btnEliminarTop').addEventListener('click', eliminarDesdeFormulario);
     document.getElementById('btnLimpiar').addEventListener('click', limpiarFormulario);
     
@@ -41,9 +42,13 @@ function dibujarTabla(roles) {
             <td>${rol.IdRole}</td>
             <td class="fw-bold">${rol.Nombre}</td>
             <td>
-                <button class="btn btn-sm btn-warning" data-permiso="Cambio" 
+                <button class="btn btn-sm btn-warning me-1" data-permiso="Cambio" 
                     onclick="cargarParaEdicion('${rolJSON}')">
-                    Seleccionar
+                    Editar
+                </button>
+                <button class="btn btn-sm btn-danger" data-permiso="Baja" 
+                    onclick="eliminarDesdeFormulario(${rol.IdRole})">
+                    Eliminar
                 </button>
             </td>
         `;
@@ -59,6 +64,7 @@ window.cargarParaEdicion = function(rolString) {
     document.getElementById('Nombre').value = rol.Nombre;
     
     document.getElementById('btnEliminarTop').classList.remove('d-none');
+    mostrarBotonSegunModo(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -66,6 +72,7 @@ function limpiarFormulario() {
     document.getElementById('formRole').reset();
     document.getElementById('IdRole').value = '';
     document.getElementById('btnEliminarTop').classList.add('d-none');
+    mostrarBotonSegunModo(false);
 }
 
 async function guardarRol() {
@@ -101,8 +108,8 @@ async function guardarRol() {
     }
 }
 
-async function eliminarDesdeFormulario() {
-    const id = document.getElementById('IdRole').value;
+async function eliminarDesdeFormulario(idParam) {
+    const id = idParam || document.getElementById('IdRole').value;
     if (!id || !confirm('¿Estás seguro de eliminar este rol? Toma en cuenta que podría afectar a los usuarios asignados a él.')) return;
 
     try {

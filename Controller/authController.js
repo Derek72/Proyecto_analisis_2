@@ -1,7 +1,31 @@
 const usuarioModel = require('../Model/usuarioModel.js');
 const bitacoraModel = require('../Model/bitacoraModel.js');
 const roleOpcionModel = require('../Model/roleOpcionModel.js');
+const { obtenerPoliticaPorSucursal } = require('../Utils/passwordPolicy.js');
 const bcrypt = require('bcrypt');
+
+/**
+ * Determina si, según la política de caducidad de la EMPRESA (PasswordCantidadCaducidadDias),
+ * la contraseña actual del usuario ya venció.
+ */
+async function passwordHaCaducado(usuario) {
+  const politica = await obtenerPoliticaPorSucursal(usuario.IdSucursal);
+  const diasCaducidad = politica ? politica.PasswordCantidadCaducidadDias : 0;
+
+  // Sin política de caducidad configurada (0, null o empresa no encontrada): nunca caduca.
+  if (!diasCaducidad || diasCaducidad <= 0) {
+    return false;
+  }
+
+  // Fecha base: el último cambio de contraseña; si nunca la ha cambiado, se usa su fecha de creación.
+  const fechaBase = usuario.UltimaFechaCambioPassword || usuario.FechaCreacion;
+  if (!fechaBase) {
+    return false;
+  }
+
+  const diasTranscurridos = (new Date() - new Date(fechaBase)) / (1000 * 3600 * 24);
+  return diasTranscurridos >= diasCaducidad;
+}
 
 async function login(req, res) {
   const { Username, Password } = req.body;
@@ -81,18 +105,36 @@ async function login(req, res) {
 
     await usuarioModel.resetearIntentosYEstado(Username, 1);
 
+    // Política de caducidad de contraseña (PasswordCantidadCaducidadDias de la EMPRESA):
+    // si ya venció, se marca la cuenta y se obliga a cambiarla antes de continuar.
+    const caducada = await passwordHaCaducado(usuario);
+    const requiereCambioPassword = usuario.RequiereCambiarPassword === 1 || caducada;
+
+    if (caducada && usuario.RequiereCambiarPassword !== 1) {
+      await usuarioModel.marcarRequiereCambioPassword(Username);
+    }
+
     await bitacoraModel.registrarAcceso({
       IdUsuario: usuario.IdUsuario,
       IdTipoAcceso: 1,
       DireccionIp: ipOrigen,
       HttpUserAgent: navegador,
-      Acceso: 'Inicio de sesión exitoso'
+      Acceso: requiereCambioPassword
+        ? 'Inicio de sesión exitoso. Contraseña caducada/pendiente de cambio.'
+        : 'Inicio de sesión exitoso'
     });
 
-    const permisos = await roleOpcionModel.obtenerPermisosPorRole(usuario.IdRole);
+    // Si la contraseña caducó (o ya estaba marcada para cambio), no se entregan permisos
+    // todavía: el usuario debe cambiar su contraseña antes de poder usar el sistema.
+    const permisos = requiereCambioPassword
+      ? []
+      : await roleOpcionModel.obtenerPermisosPorRole(usuario.IdRole);
 
     res.json({
-      mensaje: '¡Inicio de sesión exitoso!',
+      mensaje: requiereCambioPassword
+        ? 'Tu contraseña ha caducado o requiere ser cambiada. Debes actualizarla antes de continuar.'
+        : '¡Inicio de sesión exitoso!',
+      requiereCambioPassword,
       usuario: {
         id: usuario.IdUsuario,
         nombre: `${usuario.Nombre} ${usuario.Apellido}`,

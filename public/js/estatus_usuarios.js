@@ -7,7 +7,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     cargarEstatus();
 
-    document.getElementById('btnGuardar').addEventListener('click', guardarEstatus);
+    document.getElementById('btnCrear').addEventListener('click', guardarEstatus);
+    document.getElementById('btnActualizar').addEventListener('click', guardarEstatus);
     document.getElementById('btnEliminarTop').addEventListener('click', eliminarDesdeFormulario);
     document.getElementById('btnLimpiar').addEventListener('click', limpiarFormulario);
     
@@ -44,9 +45,13 @@ function dibujarTabla(estatusList) {
             <td>${estatus.IdStatusUsuario}</td>
             <td class="fw-bold">${estatus.Nombre}</td>
             <td>
-                <button class="btn btn-sm btn-warning" data-permiso="Cambio" 
+                <button class="btn btn-sm btn-warning me-1" data-permiso="Cambio" 
                     onclick="cargarParaEdicion('${estatusJSON}')">
-                    Seleccionar
+                    Editar
+                </button>
+                <button class="btn btn-sm btn-danger" data-permiso="Baja" 
+                    onclick="eliminarDesdeFormulario(${estatus.IdStatusUsuario})">
+                    Eliminar
                 </button>
             </td>
         `;
@@ -63,6 +68,7 @@ window.cargarParaEdicion = function(estatusString) {
     document.getElementById('Nombre').value = estatus.Nombre;
     
     document.getElementById('btnEliminarTop').classList.remove('d-none');
+    mostrarBotonSegunModo(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -70,6 +76,7 @@ function limpiarFormulario() {
     document.getElementById('formEstatus').reset();
     document.getElementById('IdStatusUsuario').value = '';
     document.getElementById('btnEliminarTop').classList.add('d-none');
+    mostrarBotonSegunModo(false);
 }
 
 async function guardarEstatus() {
@@ -106,8 +113,8 @@ async function guardarEstatus() {
     }
 }
 
-async function eliminarDesdeFormulario() {
-    const id = document.getElementById('IdStatusUsuario').value;
+async function eliminarDesdeFormulario(idParam) {
+    const id = idParam || document.getElementById('IdStatusUsuario').value;
     if (!id || !confirm('¿Estás seguro de eliminar este estatus?')) return;
 
     try {
