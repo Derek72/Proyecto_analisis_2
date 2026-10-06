@@ -14,6 +14,9 @@ const flujoStatusEmpleadoModel = require('../Model/flujoStatusEmpleadoModel.js')
 const tipoDocumentoModel = require('../Model/tipoDocumentoModel.js');
 const departamentoModel = require('../Model/departamentoModel.js');
 const puestoModel = require('../Model/puestoModel.js');
+const personaModel = require('../Model/personaModel.js');
+const documentoPersonaModel = require('../Model/documentoPersonaModel.js');
+const bancoModel = require('../Model/bancoModel.js');
 
 //empresas
 async function obtenerEmpresas(req, res) {
@@ -648,6 +651,138 @@ async function eliminarPuesto(req, res) {
     }
 }
 
+// --- 7. Funciones para Personas ---
+async function obtenerPersonas(req, res) {
+    try {
+        const personas = await personaModel.obtenerTodos();
+        res.json(personas);
+    } catch (error) {
+        res.status(500).json({ mensaje: 'Error al obtener las personas', error: error.message });
+    }
+}
+
+async function crearPersona(req, res) {
+    try {
+        const { Nombre, Apellido, FechaNacimiento, IdGenero, Direccion, Telefono, CorreoElectronico, IdEstadoCivil, UsuarioCreacion } = req.body;
+        await personaModel.crear({ Nombre, Apellido, FechaNacimiento, IdGenero, Direccion, Telefono, CorreoElectronico, IdEstadoCivil, UsuarioCreacion });
+        res.status(201).json({ mensaje: 'Persona creada exitosamente' });
+    } catch (error) {
+        res.status(500).json({ mensaje: 'Error al crear la persona', error: error.message });
+    }
+}
+
+async function actualizarPersona(req, res) {
+    try {
+        const { id } = req.params;
+        const { Nombre, Apellido, FechaNacimiento, IdGenero, Direccion, Telefono, CorreoElectronico, IdEstadoCivil, UsuarioModificacion } = req.body;
+        await personaModel.actualizar(id, { Nombre, Apellido, FechaNacimiento, IdGenero, Direccion, Telefono, CorreoElectronico, IdEstadoCivil, UsuarioModificacion });
+        res.json({ mensaje: 'Persona actualizada exitosamente' });
+    } catch (error) {
+        res.status(500).json({ mensaje: 'Error al actualizar la persona', error: error.message });
+    }
+}
+
+async function eliminarPersona(req, res) {
+    try {
+        const { id } = req.params;
+        await personaModel.eliminar(id);
+        res.json({ mensaje: 'Persona eliminada exitosamente' });
+    } catch (error) {
+        if (error.code === 'ER_ROW_IS_REFERENCED_2') {
+            return res.status(400).json({ mensaje: 'No se puede eliminar porque esta persona ya tiene documentos o un empleado asociado.' });
+        }
+        res.status(500).json({ mensaje: 'Error al eliminar la persona', error: error.message });
+    }
+}
+
+// --- 8. Funciones para Documentos de Personas ---
+async function obtenerDocumentosPersona(req, res) {
+    try {
+        const documentos = await documentoPersonaModel.obtenerTodos();
+        res.json(documentos);
+    } catch (error) {
+        res.status(500).json({ mensaje: 'Error al obtener los documentos de personas', error: error.message });
+    }
+}
+
+async function crearDocumentoPersona(req, res) {
+    try {
+        const { IdPersona, IdTipoDocumento, NoDocumento, UsuarioCreacion } = req.body;
+        await documentoPersonaModel.crear({ IdPersona, IdTipoDocumento, NoDocumento, UsuarioCreacion });
+        res.status(201).json({ mensaje: 'Documento de persona creado exitosamente' });
+    } catch (error) {
+        if (error.code === 'ER_DUP_ENTRY') {
+            return res.status(400).json({ mensaje: 'Esta persona ya tiene registrado un documento de ese tipo.' });
+        }
+        res.status(500).json({ mensaje: 'Error al crear el documento de persona', error: error.message });
+    }
+}
+
+async function actualizarDocumentoPersona(req, res) {
+    try {
+        const { idPersona, idTipoDocumento } = req.params;
+        const { NoDocumento, UsuarioModificacion } = req.body;
+        await documentoPersonaModel.actualizar(idPersona, idTipoDocumento, { NoDocumento, UsuarioModificacion });
+        res.json({ mensaje: 'Documento de persona actualizado exitosamente' });
+    } catch (error) {
+        res.status(500).json({ mensaje: 'Error al actualizar el documento de persona', error: error.message });
+    }
+}
+
+async function eliminarDocumentoPersona(req, res) {
+    try {
+        const { idPersona, idTipoDocumento } = req.params;
+        await documentoPersonaModel.eliminar(idPersona, idTipoDocumento);
+        res.json({ mensaje: 'Documento de persona eliminado exitosamente' });
+    } catch (error) {
+        res.status(500).json({ mensaje: 'Error al eliminar el documento de persona', error: error.message });
+    }
+}
+
+// --- 9. Funciones para Bancos ---
+async function obtenerBancos(req, res) {
+    try {
+        const bancos = await bancoModel.obtenerTodos();
+        res.json(bancos);
+    } catch (error) {
+        res.status(500).json({ mensaje: 'Error al obtener los bancos', error: error.message });
+    }
+}
+
+async function crearBanco(req, res) {
+    try {
+        const { Nombre, UsuarioCreacion } = req.body;
+        await bancoModel.crear({ Nombre, UsuarioCreacion });
+        res.status(201).json({ mensaje: 'Banco creado exitosamente' });
+    } catch (error) {
+        res.status(500).json({ mensaje: 'Error al crear el banco', error: error.message });
+    }
+}
+
+async function actualizarBanco(req, res) {
+    try {
+        const { id } = req.params;
+        const { Nombre, UsuarioModificacion } = req.body;
+        await bancoModel.actualizar(id, { Nombre, UsuarioModificacion });
+        res.json({ mensaje: 'Banco actualizado exitosamente' });
+    } catch (error) {
+        res.status(500).json({ mensaje: 'Error al actualizar el banco', error: error.message });
+    }
+}
+
+async function eliminarBanco(req, res) {
+    try {
+        const { id } = req.params;
+        await bancoModel.eliminar(id);
+        res.json({ mensaje: 'Banco eliminado exitosamente' });
+    } catch (error) {
+        if (error.code === 'ER_ROW_IS_REFERENCED_2') {
+            return res.status(400).json({ mensaje: 'No se puede eliminar porque este banco ya está asignado a una cuenta bancaria de empleado.' });
+        }
+        res.status(500).json({ mensaje: 'Error al eliminar el banco', error: error.message });
+    }
+}
+
 module.exports = {
   obtenerEmpresas, crearEmpresa, actualizarEmpresa, eliminarEmpresa,
   obtenerSucursales, crearSucursal, actualizarSucursal, eliminarSucursal, obtenerSucursalesPorEmpresa,
@@ -663,5 +798,8 @@ module.exports = {
   obtenerFlujosStatus, crearFlujoStatus, actualizarFlujoStatus, eliminarFlujoStatus,
   obtenerTiposDocumentos, crearTipoDocumento, actualizarTipoDocumento, eliminarTipoDocumento,
   obtenerDepartamentos, crearDepartamento, actualizarDepartamento, eliminarDepartamento,
-  obtenerPuestos, crearPuesto, actualizarPuesto, eliminarPuesto
+  obtenerPuestos, crearPuesto, actualizarPuesto, eliminarPuesto,
+  obtenerPersonas, crearPersona, actualizarPersona, eliminarPersona,
+  obtenerDocumentosPersona, crearDocumentoPersona, actualizarDocumentoPersona, eliminarDocumentoPersona,
+  obtenerBancos, crearBanco, actualizarBanco, eliminarBanco
 };

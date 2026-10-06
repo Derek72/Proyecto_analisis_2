@@ -94,4 +94,23 @@ router.get('/puestos', verificarPermisos('Puestos', 'Consultar'), catalogoContro
 router.post('/puestos', verificarPermisos('Puestos', 'Alta'), catalogoController.crearPuesto);
 router.put('/puestos/:id', verificarPermisos('Puestos', 'Cambio'), catalogoController.actualizarPuesto);
 router.delete('/puestos/:id', verificarPermisos('Puestos', 'Baja'), catalogoController.eliminarPuesto);
+
+// RUTAS PARA PERSONAS
+router.get('/personas', verificarPermisos('Personas', 'Consultar'), catalogoController.obtenerPersonas);
+router.post('/personas', verificarPermisos('Personas', 'Alta'), catalogoController.crearPersona);
+router.put('/personas/:id', verificarPermisos('Personas', 'Cambio'), catalogoController.actualizarPersona);
+router.delete('/personas/:id', verificarPermisos('Personas', 'Baja'), catalogoController.eliminarPersona);
+
+// RUTAS PARA DOCUMENTOS DE PERSONAS (PK compuesta: IdPersona + IdTipoDocumento)
+router.get('/documentos-persona', verificarPermisos('Documentos de Personas', 'Consultar'), catalogoController.obtenerDocumentosPersona);
+router.post('/documentos-persona', verificarPermisos('Documentos de Personas', 'Alta'), catalogoController.crearDocumentoPersona);
+router.put('/documentos-persona/:idPersona/:idTipoDocumento', verificarPermisos('Documentos de Personas', 'Cambio'), catalogoController.actualizarDocumentoPersona);
+router.delete('/documentos-persona/:idPersona/:idTipoDocumento', verificarPermisos('Documentos de Personas', 'Baja'), catalogoController.eliminarDocumentoPersona);
+
+// RUTAS PARA BANCOS
+router.get('/bancos', verificarPermisos('Bancos', 'Consultar'), catalogoController.obtenerBancos);
+router.post('/bancos', verificarPermisos('Bancos', 'Alta'), catalogoController.crearBanco);
+router.put('/bancos/:id', verificarPermisos('Bancos', 'Cambio'), catalogoController.actualizarBanco);
+router.delete('/bancos/:id', verificarPermisos('Bancos', 'Baja'), catalogoController.eliminarBanco);
+
 module.exports = router;
