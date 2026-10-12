@@ -8,6 +8,7 @@ const authRoutes = require('./Routes/authRoutes.js');
 const usuarioRoutes = require('./Routes/usuarioRoutes.js');
 const catalogoRoutes = require('./Routes/catalogoRoutes.js');
 const seguridadRoutes = require('./Routes/seguridadRoutes.js');
+const planillaRoutes = require('./Routes/planillaRoutes.js');
 
 const app = express();
 const PORT = 3000;
@@ -41,6 +42,7 @@ app.use('/auth', authRoutes);
 app.use('/usuario', usuarioRoutes);
 app.use('/catalogos', catalogoRoutes);
 app.use('/seguridad', seguridadRoutes);
+app.use('/planilla', planillaRoutes);
 
 // Iniciar servidor
 app.listen(PORT, '0.0.0.0', () => {
