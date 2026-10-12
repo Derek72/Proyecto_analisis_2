@@ -423,6 +423,9 @@ async function eliminarEstadoCivil(req, res) {
         await estadoCivilModel.eliminar(id);
         res.json({ mensaje: 'Estado civil eliminado exitosamente' });
     } catch (error) {
+        if (error.code === 'ER_ROW_IS_REFERENCED_2') {
+            return res.status(400).json({ mensaje: 'No se puede eliminar porque este estado civil ya está asignado a una persona.' });
+        }
         res.status(500).json({ mensaje: 'Error al eliminar estado civil', error: error.message });
     }
 }
@@ -464,6 +467,9 @@ async function eliminarStatusEmpleado(req, res) {
         await statusEmpleadoModel.eliminar(id);
         res.json({ mensaje: 'Status de empleado eliminado exitosamente' });
     } catch (error) {
+        if (error.code === 'ER_ROW_IS_REFERENCED_2') {
+            return res.status(400).json({ mensaje: 'No se puede eliminar porque este status ya está asignado a un empleado o a un flujo.' });
+        }
         res.status(500).json({ mensaje: 'Error al eliminar status de empleado', error: error.message });
     }
 }

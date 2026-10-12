@@ -173,7 +173,7 @@ function exportarExcel() {
         }
         csv.push(fila.join(','));
     }
-    const blob = new Blob([csv.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    const blob = new Blob(['\uFEFF' + csv.join('\n')], { type: 'text/csv;charset=utf-8;' });
     const enlace = document.createElement('a');
     enlace.href = window.URL.createObjectURL(blob);
     enlace.download = 'Departamentos.csv';
