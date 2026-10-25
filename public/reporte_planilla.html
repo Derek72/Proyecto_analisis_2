@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>14. Reporte de Planilla</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        @media print {
+            .no-print, .btn { display: none !important; }
+            body { padding: 0 !important; background-color: #fff !important; }
+            .shadow-sm { box-shadow: none !important; border: none !important; }
+            .print-table { font-size: 0.75rem !important; }
+        }
+        #tablaReporte { font-size: 0.85rem; }
+    </style>
+</head>
+<body class="bg-light p-4">
+
+    <div class="card shadow-sm border-0 mb-4 no-print">
+        <div class="card-body">
+            <h4 class="card-title text-secondary border-bottom pb-2 mb-3">
+                <i class="bi bi-file-earmark-bar-graph me-2 text-primary"></i>14. Reporte General de Planilla
+            </h4>
+
+            <div class="row g-3 align-items-end mt-1">
+                <div class="col-md-5">
+                    <label class="form-label small text-muted mb-1 fw-bold">Período de Planilla:</label>
+                    <select class="form-select" id="cboPeriodo">
+                        <option value="">Cargando períodos procesados...</option>
+                    </select>
+                </div>
+                <div class="col-md-7 d-flex gap-2">
+                    <button type="button" class="btn btn-primary px-3" id="btnConsultar" data-permiso="Consultar">
+                        <i class="bi bi-search me-1"></i>Consultar
+                    </button>
+                    <button type="button" class="btn btn-outline-danger px-3" id="btnImprimir" data-permiso="Imprimir" disabled>
+                        <i class="bi bi-printer me-1"></i>Imprimir (PDF)
+                    </button>
+                    <button type="button" class="btn btn-outline-success px-3" id="btnExportar" data-permiso="Exportar" disabled>
+                        <i class="bi bi-file-earmark-excel me-1"></i>Exportar (Excel)
+                    </button>
+                    <button type="button" class="btn btn-light border" id="btnRecargar" title="Recargar lista">
+                        <i class="bi bi-arrow-clockwise"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div id="alertaPeriodo" class="alert alert-info py-2 mt-3 mb-0 d-none"></div>
+        </div>
+    </div>
+
+    <div id="seccionReporte" class="card shadow-sm border-0 d-none">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
+                <div>
+                    <h5 class="fw-bold mb-0 text-dark" id="lblTituloPeriodo">Planilla Procesada</h5>
+                    <small class="text-muted" id="lblSubtituloPeriodo"></small>
+                </div>
+                <div class="text-end">
+                    <span class="badge bg-primary fs-6" id="badgeEmpleados">0 Empleados</span>
+                </div>
+            </div>
+
+            <div class="row g-3 mb-4 text-center">
+                <div class="col-md-4">
+                    <div class="border rounded p-3 bg-white shadow-sm border-start border-primary border-4">
+                        <div class="small text-muted text-uppercase fw-bold">Total de Ingresos</div>
+                        <div class="fs-4 fw-bold text-dark" id="kpiTotalIngresos">Q 0.00</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="border rounded p-3 bg-white shadow-sm border-start border-danger border-4">
+                        <div class="small text-muted text-uppercase fw-bold">Total de Descuentos</div>
+                        <div class="fs-4 fw-bold text-danger" id="kpiTotalDescuentos">Q 0.00</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="border rounded p-3 bg-white shadow-sm border-start border-success border-4">
+                        <div class="small text-muted text-uppercase fw-bold">Salario Neto General</div>
+                        <div class="fs-4 fw-bold text-success" id="kpiSalarioNeto">Q 0.00</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-2 mb-3 align-items-end no-print bg-light p-3 rounded border">
+                <div class="col-md-5">
+                    <label class="form-label small fw-bold text-secondary mb-1">Buscar por Empleado o ID:</label>
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text"><i class="bi bi-search"></i></span>
+                        <input type="text" class="form-control" id="filtroEmpleadoRep" placeholder="Nombre o ID...">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label small fw-bold text-secondary mb-1">Puesto:</label>
+                    <select class="form-select form-select-sm" id="filtroPuestoRep">
+                        <option value="">-- Todos los Puestos --</option>
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex gap-1">
+                    <button type="button" class="btn btn-sm btn-outline-secondary w-100" id="btnLimpiarFiltrosRep" title="Restablecer filtros">
+                        <i class="bi bi-x-circle me-1"></i>Limpiar Filtros
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-striped table-hover table-bordered text-center align-middle print-table" id="tablaReporte">
+                    <thead class="table-dark">
+                        <tr>
+                            <th data-columna="IdEmpleado">ID</th>
+                            <th data-columna="NombreEmpleado" class="text-start">Empleado</th>
+                            <th data-columna="FechaContratacion">Fecha Contratación (DD/MM/AAAA)</th>
+                            <th data-columna="NombrePuesto">Puesto</th>
+                            <th>Status</th>
+                            <th data-columna="IngresoSueldoBase" class="text-end">Sueldo Base</th>
+                            <th class="text-end">Bonificación Decreto</th>
+                            <th class="text-end">Otros Ingresos</th>
+                            <th class="text-center">% IGSS</th>
+                            <th class="text-end">Descuento IGSS</th>
+                            <th class="text-center">% ISR</th>
+                            <th class="text-end">Descuento ISR</th>
+                            <th class="text-end">Desc. Inasistencias</th>
+                            <th data-columna="SalarioNeto" class="text-end">Salario Neto</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaReporteBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/seguridad.js"></script>
+    <script src="/js/reportePlanilla.js"></script>
+</body>
+</html>

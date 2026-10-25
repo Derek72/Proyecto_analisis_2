@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Catálogo de Usuarios</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light p-4">
+    <div class="border p-4 rounded shadow-sm mb-4 bg-white">
+        <h4 class="mb-3 text-secondary border-bottom pb-2">Gestión de Usuarios</h4>
+        
+        <form id="formUsuario" class="row g-3">
+            
+            <div class="col-md-3">
+                <label class="form-label small mb-1">Usuario (ID Login)</label>
+                <input type="text" class="form-control" id="IdUsuario" placeholder="Ej. JPEREZ" required>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small mb-1">Nombre</label>
+                <input type="text" class="form-control" id="Nombre" required>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small mb-1">Apellidos</label>
+                <input type="text" class="form-control" id="Apellido" required>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small mb-1">Fecha de Nacimiento <span class="text-secondary" style="font-size:0.75rem;">(DD/MM/AAAA)</span></label>
+                <input type="date" class="form-control" id="FechaNacimiento" required>
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label small mb-1">Género</label>
+                <select id="IdGenero" class="form-select" required><option value="">Cargando...</option></select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label small mb-1">Correo Electrónico</label>
+                <input type="email" class="form-control" id="CorreoElectronico" required>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small mb-1">Teléfono Móvil</label>
+                <input type="text" class="form-control" id="TelefonoMovil" maxlength="30">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small mb-1">Contraseña</label>
+                <input type="password" class="form-control" id="Password" placeholder="Dejar en blanco para no cambiar">
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label small mb-1">Fotografía (URL o Base64)</label>
+                <input type="text" class="form-control" id="Fotografia">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small mb-1">Pregunta de Recuperación</label>
+                <input type="text" class="form-control" id="Pregunta" required>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small mb-1">Respuesta</label>
+                <input type="text" class="form-control" id="Respuesta" required>
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label small mb-1">Rol</label>
+                <select id="IdRole" class="form-select" required><option value="">Cargando...</option></select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small mb-1">Estatus</label>
+                <select id="IdStatusUsuario" class="form-select" required><option value="">Cargando...</option></select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small mb-1">Empresa</label>
+                <select id="IdEmpresa" class="form-select" required><option value="">Cargando...</option></select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small mb-1">Sucursal</label>
+                <select id="IdSucursal" class="form-select" required disabled>
+                    <option value="">Seleccione primero una empresa...</option>
+                </select>
+            </div>
+
+            <div class="col-12 text-end mt-4">
+                <button type="button" class="btn btn-primary px-4" id="btnCrear" data-permiso="Alta">Crear</button>
+                <button type="button" class="btn btn-primary px-4 d-none" id="btnActualizar" data-permiso="Cambio">Guardar Cambios</button>
+                <button type="button" class="btn btn-danger px-4 d-none" id="btnEliminarTop" data-permiso="Baja">Eliminar</button>
+                <button type="button" class="btn btn-light px-4 border" id="btnLimpiar">Nuevo</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="border p-4 rounded bg-white shadow-sm">
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2 no-print">
+            <span class="badge bg-secondary py-2 px-3 fs-6" id="badgeContadorUsuarios">Mostrando 0 registros</span>
+        </div>
+
+        <div class="card mb-3 bg-light border-0 no-print">
+            <div class="card-body p-3">
+                <div class="row g-2 align-items-end">
+                    <div class="col-md-4">
+                        <label class="form-label small text-muted mb-1 fw-bold">Buscar por ID, Nombre o Correo:</label>
+                        <input type="text" class="form-control form-control-sm" id="filtroTexto" placeholder="Escriba para buscar...">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small text-muted mb-1 fw-bold">Rol:</label>
+                        <select class="form-select form-select-sm" id="filtroRole">
+                            <option value="">Todos los roles</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small text-muted mb-1 fw-bold">Estatus:</label>
+                        <select class="form-select form-select-sm" id="filtroStatus">
+                            <option value="">Todos los estatus</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 d-flex gap-1">
+                        <button type="button" class="btn btn-sm btn-outline-secondary w-100" id="btnLimpiarFiltros" title="Limpiar Filtros">
+                            <i class="bi bi-x-circle me-1"></i>Limpiar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <table class="table table-striped align-middle" id="tablaUsuarios">
+            <thead class="table-dark text-center">
+                <tr>
+                    <th data-columna="IdUsuario" style="cursor:pointer;" title="Clic para ordenar">ID</th>
+                    <th data-columna="Nombre" style="cursor:pointer;" title="Clic para ordenar">Nombre</th>
+                    <th data-columna="FechaNacimiento" style="cursor:pointer;" title="Clic para ordenar">Fecha Nacimiento</th>
+                    <th data-columna="CorreoElectronico" style="cursor:pointer;" title="Clic para ordenar">Correo</th>
+                    <th data-columna="NombreRole" style="cursor:pointer;" title="Clic para ordenar">Rol</th>
+                    <th data-columna="NombreStatus" style="cursor:pointer;" title="Clic para ordenar">Estatus</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="tablaUsuariosBody" class="text-center"></tbody>
+        </table>
+    </div>
+
+    <script src="/js/seguridad.js"></script>
+    <script src="/js/usuarios.js"></script>
+</body>
+</html>

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Inasistencias de Empleados</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        @media print {
+            .no-print, .btn, th:last-child, td:last-child { display: none !important; }
+            body { padding: 0 !important; }
+            .shadow-sm { box-shadow: none !important; border: none !important; }
+        }
+    </style>
+</head>
+<body class="bg-white p-4">
+
+    <div class="border p-4 rounded shadow-sm mb-4 no-print">
+        <h4 class="mb-3 text-secondary border-bottom pb-2">
+            <i class="bi bi-calendar-x me-2"></i>Inasistencias de Empleados
+        </h4>
+
+        <form id="formInasistencia" class="row g-3 mt-2">
+            <div class="col-md-4">
+                <label class="form-label small text-muted mb-1">Empleado</label>
+                <select class="form-select" id="IdEmpleado" required><option value="">Cargando...</option></select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small text-muted mb-1">Fecha Inicial <span class="text-secondary" style="font-size:0.75rem;">(DD/MM/AAAA)</span></label>
+                <input type="date" class="form-control" id="FechaInicial" required>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small text-muted mb-1">Fecha Final <span class="text-secondary" style="font-size:0.75rem;">(DD/MM/AAAA)</span></label>
+                <input type="date" class="form-control" id="FechaFinal" required>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label small text-muted mb-1">Fecha de Procesamiento</label>
+                <input type="text" class="form-control bg-light" id="FechaProcesado" value="Pendiente" readonly>
+            </div>
+            <div class="col-md-12">
+                <label class="form-label small text-muted mb-1">Motivo de la Inasistencia</label>
+                <textarea class="form-control" id="MotivoInasistencia" rows="2" maxlength="300" placeholder="Ej. Enfermedad, permiso personal..." required></textarea>
+            </div>
+
+            <div class="col-12 d-flex">
+                <button type="button" class="btn btn-primary me-2" id="btnCrear" data-permiso="Alta">Crear</button>
+                <button type="button" class="btn btn-primary me-2 d-none" id="btnActualizar" data-permiso="Cambio">Guardar Cambios</button>
+                <button type="button" class="btn btn-danger me-2 d-none" id="btnEliminarTop" data-permiso="Baja">Eliminar</button>
+                <button type="button" class="btn btn-light border" id="btnLimpiar">Limpiar</button>
+                <span class="small text-muted align-self-center ms-3">La fecha de procesamiento la asigna el Cálculo de Planilla; una inasistencia procesada ya no se puede modificar.</span>
+            </div>
+        </form>
+    </div>
+
+    <div class="border p-4 rounded shadow-sm">
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2 no-print">
+            <span class="badge bg-secondary py-2 px-3 fs-6" id="badgeContadorInasistencias">Mostrando 0 registros</span>
+            <div class="d-flex gap-2">
+                <button class="btn btn-sm btn-outline-secondary" data-permiso="Imprimir" id="btnImprimir">
+                    <i class="bi bi-printer"></i> Imprimir
+                </button>
+                <button class="btn btn-sm btn-outline-success" data-permiso="Exportar" id="btnExportar">
+                    <i class="bi bi-file-excel"></i> Exportar
+                </button>
+            </div>
+        </div>
+
+        <div class="card mb-3 bg-light border-0 no-print">
+            <div class="card-body p-3">
+                <div class="row g-2 align-items-end">
+                    <div class="col-md-4">
+                        <label class="form-label small text-muted mb-1 fw-bold">Buscar por ID, Empleado o Motivo:</label>
+                        <input type="text" class="form-control form-control-sm" id="filtroTexto" placeholder="Escriba para buscar...">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small text-muted mb-1 fw-bold">Estado Procesada:</label>
+                        <select class="form-select form-select-sm" id="filtroEstado">
+                            <option value="">Todos</option>
+                            <option value="procesada">Procesadas</option>
+                            <option value="pendiente">Pendientes</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small text-muted mb-1 fw-bold">Desde <span style="font-size:0.7rem;">(DD/MM/AAAA)</span>:</label>
+                        <input type="date" class="form-control form-control-sm" id="filtroFechaDesde">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small text-muted mb-1 fw-bold">Hasta <span style="font-size:0.7rem;">(DD/MM/AAAA)</span>:</label>
+                        <input type="date" class="form-control form-control-sm" id="filtroFechaHasta">
+                    </div>
+                    <div class="col-md-2 d-flex gap-1">
+                        <button type="button" class="btn btn-sm btn-outline-secondary w-100" id="btnLimpiarFiltros" title="Limpiar Filtros">
+                            <i class="bi bi-x-circle me-1"></i>Limpiar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <table class="table table-striped table-hover border text-center align-middle" id="tablaInasistencias">
+            <thead class="table-dark">
+                <tr>
+                    <th data-columna="IdInasistencia" style="cursor:pointer;" title="Clic para ordenar">ID</th>
+                    <th data-columna="NombreEmpleado" style="cursor:pointer;" title="Clic para ordenar">Empleado</th>
+                    <th data-columna="FechaInicial" style="cursor:pointer;" title="Clic para ordenar">Fecha Inicial</th>
+                    <th data-columna="FechaFinal" style="cursor:pointer;" title="Clic para ordenar">Fecha Final</th>
+                    <th data-columna="Dias" style="cursor:pointer;" title="Clic para ordenar">Días</th>
+                    <th data-columna="MotivoInasistencia" style="cursor:pointer;" title="Clic para ordenar">Motivo</th>
+                    <th data-columna="FechaProcesado" style="cursor:pointer;" title="Clic para ordenar">Procesada</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="tablaInasistenciasBody"></tbody>
+        </table>
+    </div>
+
+    <script src="/js/seguridad.js"></script>
+    <script src="/js/inasistencia.js"></script>
+</body>
+</html>
